@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin name="Main"
+        title="Main Plugin"
+        author="Popeye Zhong(zongsoft@gmail.com)"
+        version="4.3.0.1603"
+        copyright="Copyright (C) 2012-2016 Zongsoft Corporation. All rights reserved."
+        description="Created Date: 2012-06-09 by Popeye Zhong, Modified Date: 2016-04-10 by Popeye Zhong.">
+
+	<manifest>
+		<assemblies>
+			<assembly name="Zongsoft.Plugins" />
+		</assemblies>
+	</manifest>
+
+	<builders>
+		<!-- 基础对象 -->
+		<builder name="link" type="Zongsoft.Plugins.Builders.LinkBuilder, Zongsoft.Plugins"/>
+		<builder name="object" type="Zongsoft.Plugins.Builders.ObjectBuilder, Zongsoft.Plugins"/>
+		<builder name="category" type="Zongsoft.Collections.Plugins.Builders.CategoryBuilder, Zongsoft.Plugins" />
+		<builder name="component" type="Zongsoft.ComponentModel.Plugins.Builders.ComponentBuilder, Zongsoft.Plugins" />
+
+		<!-- 选项配置 -->
+		<builder name="option" type="Zongsoft.Options.Plugins.Builders.OptionBuilder, Zongsoft.Plugins" />
+
+		<!-- 服务管理 -->
+		<builder name="provider" type="Zongsoft.Services.Plugins.Builders.ServiceProviderBuilder, Zongsoft.Plugins" />
+		<builder name="serviceProvider" type="Zongsoft.Services.Plugins.Builders.ServiceProviderBuilder, Zongsoft.Plugins" />
+		<builder name="commandNode" type="Zongsoft.Services.Plugins.Builders.CommandTreeNodeBuilder, Zongsoft.Plugins" />
+	</builders>
+
+	<parsers>
+		<parser name="path" type="Zongsoft.Plugins.Parsers.PluginPathParser, Zongsoft.Plugins" />
+		<parser name="type" type="Zongsoft.Plugins.Parsers.TypeParser, Zongsoft.Plugins" />
+		<parser name="object" type="Zongsoft.Plugins.Parsers.ObjectParser, Zongsoft.Plugins" />
+		<parser name="static" type="Zongsoft.Plugins.Parsers.StaticParser, Zongsoft.Plugins" />
+		<parser name="res" type="Zongsoft.Resources.Plugins.Parsers.ResourceParser, Zongsoft.Plugins" />
+		<parser name="opt" type="Zongsoft.Options.Plugins.Parsers.OptionParser, Zongsoft.Plugins" />
+		<parser name="srv" type="Zongsoft.Services.Plugins.Parsers.ServicesParser, Zongsoft.Plugins" />
+		<parser name="cmd" type="Zongsoft.Services.Plugins.Parsers.CommandParser, Zongsoft.Plugins" />
+		<parser name="predicate" type="Zongsoft.Services.Plugins.Parsers.PredicateParser, Zongsoft.Plugins" />
+	</parsers>
+
+	<!-- 挂载启动项 -->
+	<extension path="/Workbench/Startup">
+		<!--object name="TcpServer" value="{path:/Workspace/Communication/TcpServer}" /-->
+		<!--object name="FtpServer" value="{path:/Workspace/Communication/FtpServer}" /-->
+	</extension>
+
+	<!-- 声明扩展点 -->
+	<extension path="/Workbench">
+		<!-- 设置文件目录系统的服务容器 -->
+		<object name="FileSystem" type="Zongsoft.Services.Plugins.PluginServiceProvider, Zongsoft.Plugins">
+			<!-- 设置构件行为特性：将当前服务容器赋值给文件系统的静态属性 -->
+			<object.property name="Providers" type="Zongsoft.IO.FileSystem, Zongsoft.CoreLibrary" value="{path:.}" />
+
+			<!-- 挂载本地文件目录系统 -->
+			<object name="LocalFileSystem" value="{static:Zongsoft.IO.LocalFileSystem.Instance, Zongsoft.CoreLibrary}" />
+		</object>
+
+		<!-- 设置选项扩展点 -->
+		<object name="Options" value="{path:/Workspace/Environment/ApplicationContext.OptionManager.RootNode}">
+			<option name="Environment" title="{res:Text.Environment}" />
+
+			<option name="Communication" title="{res:Text.Communication}">
+				<option name="Net" title="{res:Text.Net}" />
+			</option>
+		</object>
+	</extension>
+
+	<!-- 挂载默认服务容器 -->
+	<extension path="/Workspace/Environment">
+		<applicationContext.serviceFactory.default>
+			<serviceProvider name="Default" path="/Workspace/Services" />
+		</applicationContext.serviceFactory.default>
+	</extension>
+
+	<!-- 挂载服务容器工厂 -->
+	<extension path="/Workspace/Services">
+		<object name="Providers" value="{path:/Workspace/Environment/ApplicationContext.ServiceFactory}" />
+	</extension>
+
+	<!-- 将服务容器工厂路径附加到工作台路径下，以匿名节点的方式驱动服务容器工厂的自动构建动作 -->
+	<extension path="/Workbench">
+		<object value="{path:/Workspace/Services/Providers}" />
+	</extension>
+
+	<!-- 挂载服务提供程序 -->
+	<extension path="/Workspace/Services/Providers">
+		<serviceProvider name="Data" />
+		<serviceProvider name="Communication" />
+	</extension>
+
+	<!-- 挂载默认服务容器下的各个服务 -->
+	<extension path="/Workspace/Services">
+		<object name="Queue" minimumGrow="256" type="Zongsoft.Collections.Queue, Zongsoft.CoreLibrary">
+			<object.constructor>
+				<parameter name="capacity" type="int" value="1024" />
+			</object.constructor>
+
+			<queue.maximumLimit>1024</queue.maximumLimit>
+		</object>
+
+		<object name="HasCollection" type="Zongsoft.Collections.Plugins.HasCollectionPredication, Zongsoft.Plugins" />
+
+		<!-- 链接外部服务提供程序 -->
+		<link ref="../Providers/Data" />
+		<link ref="../Providers/Communication" />
+	</extension>
+
+	<!-- 挂载命令执行器 -->
+	<extension path="/Workbench">
+		<!-- 创建命令执行器并将其设置到默认属性中 -->
+		<object name="CommandExecutor" type="Zongsoft.Services.CommandExecutor, Zongsoft.CoreLibrary">
+			<!-- 设置构件行为特性：将当前命令执行器对象赋值给命令执行器类的静态属性 -->
+			<object.property name="Default" type="Zongsoft.Services.CommandExecutor, Zongsoft.CoreLibrary" value="{path:.}" />
+
+			<!-- 将默认命令执行器的根节点暴露出来 -->
+			<object name="Commands" value="{path:../@Root}" />
+		</object>
+
+		<!-- 将默认命令执行器的根节点暴露出来 -->
+		<object name="Commands" value="{path:../CommandExecutor.Root}" />
+	</extension>
+
+	<!-- 挂载通讯业务 -->
+	<extension path="/Workspace/Communication">
+		<object name="TcpServer" type="Zongsoft.Communication.Net.TcpServer, Zongsoft.CoreLibrary">
+			<object name="Executor" value="{path:../@Executor}">
+				<object name="Filters" value="{path:../@Filters}" />
+				<object name="Pipelines" value="{path:../@Pipelines}" />
+			</object>
+		</object>
+
+		<object name="TcpClient" type="Zongsoft.Communication.Net.TcpClient, Zongsoft.CoreLibrary">
+			<object name="Executor" value="{path:../@Executor}">
+				<object name="Filters" value="{path:../@Filters}" />
+				<object name="Pipelines" value="{path:../@Pipelines}" />
+			</object>
+		</object>
+
+		<object name="FtpServer" configuration="{opt:/Communication/Net/FtpServer}" type="Zongsoft.Communication.Net.FtpServer, Zongsoft.CoreLibrary">
+			<object name="Executor" value="{path:../@Executor}">
+				<object name="Filters" value="{path:../@Filters}" />
+				<object name="Pipelines" value="{path:../@Pipelines}" />
+			</object>
+		</object>
+
+		<object name="FtpClient" type="Zongsoft.Communication.Net.FtpClient, Zongsoft.CoreLibrary" />
+	</extension>
+
+	<!-- 挂载“通讯”相关的选项配置 -->
+	<extension path="/Workbench/Options/Communication/Net">
+		<option name="FtpServer" title="{res:Text.FtpServer}" provider="application" />
+	</extension>
+
+	<!-- 挂载“通讯”相关的各种服务 -->
+	<extension path="/Workspace/Services/Communication">
+		<object name="TcpServer" value="{path:/Workspace/Communication/TcpServer}" />
+		<object name="TcpClient" value="{path:/Workspace/Communication/TcpClient}" />
+		<object name="FtpServer" value="{path:/Workspace/Communication/FtpServer}" />
+		<object name="FtpClient" value="{path:/Workspace/Communication/FtpClient}" />
+	</extension>
+</plugin>

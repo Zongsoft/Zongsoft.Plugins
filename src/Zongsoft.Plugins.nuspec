@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://www.gnu.org/licenses/lgpl-2.1.html</licenseUrl>
+    <projectUrl>https://github.com/Zongsoft/Zongsoft.Plugins</projectUrl>
+    <iconUrl>https://avatars.githubusercontent.com/u/4804332</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <summary>这是一个可插拔的插件化架构的开发框架。</summary>
+    <releaseNotes>这是一个可插拔的插件化架构的开发框架。</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>Zongsoft Plugin</tags>
+    <dependencies>
+        <dependency id="Zongsoft.CoreLibrary" version="4.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Main.plugin" target="content\plugins\Main.plugin" />
+  </files>
+</package>

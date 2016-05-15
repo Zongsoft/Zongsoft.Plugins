@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7865A0D8-8170-4AAE-A1A7-6E4C60B0C49F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Zongsoft.Plugins</RootNamespace>
+    <AssemblyName>Zongsoft.Plugins</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\Zongsoft.Plugins.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>4.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Zongsoft.CoreLibrary">
+      <HintPath>..\..\Zongsoft.CoreLibrary\src\bin\$(Configuration)\Zongsoft.CoreLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Application.cs" />
+    <Compile Include="Builders\BuilderBehaviourAttribute.cs" />
+    <Compile Include="Builders\BuilderContext.cs" />
+    <Compile Include="Builders\BuilderEventArgs.cs" />
+    <Compile Include="Builders\BuilderManager.cs" />
+    <Compile Include="Builders\LinkBuilder.cs" />
+    <Compile Include="BuiltinBehavior.cs" />
+    <Compile Include="BuiltinBehaviorCollection.cs" />
+    <Compile Include="Collections\HasCollectionPredication.cs" />
+    <Compile Include="Options\Builders\OptionBuilder.cs" />
+    <Compile Include="Options\OptionModule.cs" />
+    <Compile Include="Options\OptionUtility.cs" />
+    <Compile Include="Options\PluginSettingsProvider.cs" />
+    <Compile Include="Options\PluginSettingsProviderFactory.cs" />
+    <Compile Include="Parsers\ObjectParser.cs" />
+    <Compile Include="Parsers\StaticParser.cs" />
+    <Compile Include="Services\Builders\CommandTreeNodeBuilder.cs" />
+    <Compile Include="IAppender.cs" />
+    <Compile Include="BuiltinTypeConstructor.cs" />
+    <Compile Include="Collections\CategoryBuilder.cs" />
+    <Compile Include="ComponentModel\Builders\ComponentBuilder.cs" />
+    <Compile Include="AppenderBehaviour.cs" />
+    <Compile Include="AppenderContext.cs" />
+    <Compile Include="ObtainMode.cs" />
+    <Compile Include="Parsers\ParserContext.cs" />
+    <Compile Include="Options\Parsers\OptionParser.cs" />
+    <Compile Include="Parsers\PluginPathParser.cs" />
+    <Compile Include="Parsers\TypeParser.cs" />
+    <Compile Include="PluginApplicationContext.cs" />
+    <Compile Include="ApplicationEventArgs.cs" />
+    <Compile Include="BuilderElement.cs" />
+    <Compile Include="BuilderElementCollection.cs" />
+    <Compile Include="Builders\BuilderBase.cs" />
+    <Compile Include="Builders\ObjectBuilder.cs" />
+    <Compile Include="PluginExtendedProperty.cs" />
+    <Compile Include="PluginExtendedPropertyCollection.cs" />
+    <Compile Include="Services\Builders\ServiceProviderBuilder.cs" />
+    <Compile Include="Builtin.cs" />
+    <Compile Include="Commands\ExitCommand.cs" />
+    <Compile Include="FailureCodes.cs" />
+    <Compile Include="IBuilder.cs" />
+    <Compile Include="IParser.cs" />
+    <Compile Include="IsolationLevel.cs" />
+    <Compile Include="IWorkbench.cs" />
+    <Compile Include="IWorkbenchBase.cs" />
+    <Compile Include="Parsers\Parser.cs" />
+    <Compile Include="Services\Parsers\CommandParser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Services\Parsers\PredicateParser.cs" />
+    <Compile Include="Services\Parsers\ServicesParser.cs" />
+    <Compile Include="PluginContainer.cs" />
+    <Compile Include="PluginDependency.cs" />
+    <Compile Include="PluginDependencyCollection.cs" />
+    <Compile Include="PluginElement.cs" />
+    <Compile Include="PluginElementCollection.cs" />
+    <Compile Include="PluginFileException.cs" />
+    <Compile Include="PluginLoader.cs" />
+    <Compile Include="PluginLoaderSetup.cs" />
+    <Compile Include="PluginMountEventArgs.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="PluginCollection.cs" />
+    <Compile Include="PluginContext.cs" />
+    <Compile Include="PluginLoadedEventArgs.cs" />
+    <Compile Include="PluginLoadingEventArgs.cs" />
+    <Compile Include="PluginPath.cs" />
+    <Compile Include="PluginResolver.cs" />
+    <Compile Include="PluginSetup.cs" />
+    <Compile Include="PluginSetupBase.cs" />
+    <Compile Include="PluginStatus.cs" />
+    <Compile Include="PluginTree.cs" />
+    <Compile Include="PluginLoadEventArgs.cs" />
+    <Compile Include="PluginTreeNode.cs" />
+    <Compile Include="PluginTreeNodeCollection.cs" />
+    <Compile Include="PluginTreeNodeType.cs" />
+    <Compile Include="PluginTreeStatus.cs" />
+    <Compile Include="PluginUnloadedEventArgs.cs" />
+    <Compile Include="PluginUnloadingEventArgs.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BuiltinType.cs" />
+    <Compile Include="Resources\ResourceParser.cs" />
+    <Compile Include="Services\PluginPredicationContext.cs" />
+    <Compile Include="Services\PluginServiceProvider.cs" />
+    <Compile Include="ValueChangedEventArgs.cs" />
+    <Compile Include="ValueChangingEventArgs.cs" />
+    <Compile Include="ViewEventArgs.cs" />
+    <Compile Include="FixedElement.cs" />
+    <Compile Include="FixedElementCollection.cs" />
+    <Compile Include="PluginUtility.cs" />
+    <Compile Include="FixedElement`1.cs" />
+    <Compile Include="FixedElementCollection`1.cs" />
+    <Compile Include="PluginException.cs" />
+    <Compile Include="FixedElementType.cs" />
+    <Compile Include="WorkbenchBase.cs" />
+    <Compile Include="WorkbenchStatus.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\Main.plugin">
+      <Link>Main.plugin</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Changes.log" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
