@@ -91,7 +91,6 @@
     <Compile Include="PluginExtendedPropertyCollection.cs" />
     <Compile Include="Services\Builders\ServiceProviderBuilder.cs" />
     <Compile Include="Builtin.cs" />
-    <Compile Include="Commands\ExitCommand.cs" />
     <Compile Include="FailureCodes.cs" />
     <Compile Include="IBuilder.cs" />
     <Compile Include="IParser.cs" />
