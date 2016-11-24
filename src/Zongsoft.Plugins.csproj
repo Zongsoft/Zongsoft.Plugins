@@ -135,6 +135,8 @@
     <Compile Include="Resources\ResourceParser.cs" />
     <Compile Include="Services\PluginPredicationContext.cs" />
     <Compile Include="Services\PluginServiceProvider.cs" />
+    <Compile Include="Terminals\ApplicationContext.cs" />
+    <Compile Include="Terminals\Workbench.cs" />
     <Compile Include="ValueChangedEventArgs.cs" />
     <Compile Include="ValueChangingEventArgs.cs" />
     <Compile Include="ViewEventArgs.cs" />
