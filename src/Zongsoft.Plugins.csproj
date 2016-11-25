@@ -62,6 +62,10 @@
     <Compile Include="BuiltinBehavior.cs" />
     <Compile Include="BuiltinBehaviorCollection.cs" />
     <Compile Include="Collections\HasCollectionPredication.cs" />
+    <Compile Include="Commands\FindCommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
+    <Compile Include="Commands\TreeCommand.cs" />
+    <Compile Include="Commands\Utility.cs" />
     <Compile Include="Options\Builders\OptionBuilder.cs" />
     <Compile Include="Options\OptionModule.cs" />
     <Compile Include="Options\OptionUtility.cs" />
@@ -150,7 +154,9 @@
     <Compile Include="WorkbenchBase.cs" />
     <Compile Include="WorkbenchStatus.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="..\Main.plugin">
       <Link>Main.plugin</Link>

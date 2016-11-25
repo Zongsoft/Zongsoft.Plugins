@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Zongsoft.Plugins")]
@@ -12,5 +11,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 
-[assembly: AssemblyVersion("4.3.0.1603")]
-[assembly: AssemblyFileVersion("4.3.0.1603")]
+[assembly: AssemblyVersion("4.4.0.1611")]
+[assembly: AssemblyFileVersion("4.4.0.1611")]
