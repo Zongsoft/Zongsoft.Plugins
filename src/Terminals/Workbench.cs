@@ -40,7 +40,6 @@ namespace Zongsoft.Terminals.Plugins
 		#region 构造函数
 		public Workbench(PluginApplicationContext applicationContext) : base(applicationContext)
 		{
-			_executor = CommandExecutor.Default as TerminalCommandExecutor;
 		}
 		#endregion
 
@@ -49,7 +48,11 @@ namespace Zongsoft.Terminals.Plugins
 		{
 			get
 			{
-				return _executor;
+				return _executor ?? CommandExecutor.Default as TerminalCommandExecutor;
+			}
+			set
+			{
+				_executor = value;
 			}
 		}
 		#endregion
