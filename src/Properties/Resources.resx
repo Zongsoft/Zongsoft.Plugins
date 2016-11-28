@@ -124,10 +124,10 @@
     <value>查找指定插件路径的命令。</value>
   </data>
   <data name="Text.FindCommand.Options.MaxDepth" xml:space="preserve">
-    <value>获取指定插件树节点的内容值的获取方式，默认是不解析(never)。</value>
+    <value>显示目标对象成员的最大深度，默认是3。</value>
   </data>
   <data name="Text.FindCommand.Options.ObtainMode" xml:space="preserve">
-    <value>显示目标对象成员的最大深度，默认是3。</value>
+    <value>获取指定插件树节点的内容值的获取方式，默认是不解析(never)。</value>
   </data>
   <data name="Text.ListCommand" xml:space="preserve">
     <value>插件列表显示命令</value>
