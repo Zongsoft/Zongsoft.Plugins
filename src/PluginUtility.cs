@@ -266,11 +266,13 @@ namespace Zongsoft.Plugins
 				try
 				{
 					var propertyType = Zongsoft.Common.Convert.GetMemberType(target, propertyName);
-					Zongsoft.Common.Convert.SetValue(target, propertyName, builtin.Properties.GetValue(propertyName, propertyType, null));
+					var propertyValue = builtin.Properties.GetValue(propertyName, propertyType, null);
+
+					Zongsoft.Common.Convert.SetValue(target, propertyName, propertyValue);
 				}
 				catch(Exception ex)
 				{
-					StringBuilder message = new StringBuilder();
+					var message = new StringBuilder();
 
 					message.AppendFormat("{0}[{1}]", ex.Message, ex.Source);
 					message.AppendLine();
@@ -281,14 +283,11 @@ namespace Zongsoft.Plugins
 						message.AppendLine();
 					}
 
-					message.AppendFormat("\tOccurred an exception on set '{1}' property of '{0}' builtin, it's raw value is \"{2}\", The target type of builtin is '{3}'.",
+					message.AppendFormat("\tOccurred an error on set '{1}' property of '{0}' builtin, it's raw value is \"{2}\", The target type of builtin is '{3}'.",
 											builtin.ToString(),
 											propertyName,
 											builtin.Properties[propertyName].RawValue,
 											target.GetType().AssemblyQualifiedName);
-
-					//输出错误日志
-					Zongsoft.Diagnostics.Logger.Error(null, message.ToString(), ex);
 
 					throw new PluginException(FailureCodes.BuiltinBuildFailed, message.ToString(), ex);
 				}

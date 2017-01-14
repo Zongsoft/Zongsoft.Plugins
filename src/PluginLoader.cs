@@ -205,37 +205,24 @@ namespace Zongsoft.Plugins
 			//激发“Loading”事件
 			this.OnLoading(new PluginLoadEventArgs(settings));
 
-			try
-			{
-				//如果指定的目录路径不存在则激发“Failure”事件，并退出
-				if(!Directory.Exists(_settings.PluginsDirectory))
-					throw new DirectoryNotFoundException(string.Format("The '{0}' plugins directory is not exists.", _settings.PluginsDirectory));
+			//如果指定的目录路径不存在则激发“Failure”事件，并退出
+			if(!Directory.Exists(_settings.PluginsDirectory))
+				throw new DirectoryNotFoundException(string.Format("The '{0}' plugins directory is not exists.", _settings.PluginsDirectory));
 
-				//清空插件列表
-				_plugins.Clear();
+			//清空插件列表
+			_plugins.Clear();
 
-				//预加载插件目录下的所有插件文件
-				this.PreloadPluginFiles(_settings.PluginsDirectory, null, settings);
+			//预加载插件目录下的所有插件文件
+			this.PreloadPluginFiles(_settings.PluginsDirectory, null, settings);
 
-				//正式加载所有插件
-				this.LoadPlugins(_plugins, settings);
-			}
-			catch(Exception ex)
-			{
-				//写入错误日志
-				Zongsoft.Diagnostics.Logger.Error(ex);
+			//正式加载所有插件
+			this.LoadPlugins(_plugins, settings);
 
-				//重抛异常
-				throw;
-			}
-			finally
-			{
-				//确保加载配置对象被更新
-				_settings = settings;
+			//保存加载配置对象
+			_settings = settings;
 
-				//激发“Loaded”事件
-				this.OnLoaded(new PluginLoadEventArgs(settings));
-			}
+			//激发“Loaded”事件
+			this.OnLoaded(new PluginLoadEventArgs(settings));
 		}
 
 		/// <summary>
@@ -434,10 +421,8 @@ namespace Zongsoft.Plugins
 					plugin.Status = PluginStatus.Failed;
 					plugin.StatusDescription = string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath);
 
-					//写入错误日志(原因为插件名称重复)
-					Zongsoft.Diagnostics.Logger.Error(null, string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath));
-
-					return null;
+					//抛出插件文件异常(原因为插件名称重复)
+					throw new PluginFileException(plugin.FilePath, $"The name is '{plugin.Name}' of plugin was exists. it's path is: '{plugin.FilePath}'");
 				}
 
 				//将预加载的插件对象加入到根插件的集合中
@@ -451,10 +436,8 @@ namespace Zongsoft.Plugins
 					plugin.Status = PluginStatus.Failed;
 					plugin.StatusDescription = string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath);
 
-					//写入错误日志(原因为插件名称重复)
-					Zongsoft.Diagnostics.Logger.Error(null, string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath));
-
-					return null;
+					//抛出插件文件异常(原因为插件名称重复)
+					throw new PluginFileException(plugin.FilePath, $"The name is '{plugin.Name}' of plugin was exists. it's path is: '{plugin.FilePath}'");
 				}
 			}
 
@@ -493,8 +476,7 @@ namespace Zongsoft.Plugins
 				else
 					plugin.Parent.Children.Remove(plugin);
 
-				//写入错误日志
-				Zongsoft.Diagnostics.Logger.Error(null, string.Format("The '{0}' plugin file resolve failed.", plugin.FilePath), ex);
+				throw new PluginFileException(plugin.FilePath, $"The '{plugin.FilePath}' plugin file resolve failed.", ex);
 			}
 		}
 
