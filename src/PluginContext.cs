@@ -135,7 +135,7 @@ namespace Zongsoft.Plugins
 		{
 			get
 			{
-				return this.ResolvePath(this.Settings.WorkbenchPath, ObtainMode.Auto) as IWorkbenchBase;
+				return this.ResolvePath(this.Settings.WorkbenchPath) as IWorkbenchBase;
 			}
 		}
 		#endregion
@@ -154,22 +154,24 @@ namespace Zongsoft.Plugins
 		/// </remarks>
 		public object ResolvePath(string pathText)
 		{
-			return this.ResolvePath(pathText, ObtainMode.Auto);
+			ObtainMode mode;
+			return this.ResolvePath(this.PreparePathText(pathText, out mode), null, mode);
 		}
 
-		public object ResolvePath(string pathText, ObtainMode obtainMode)
+		internal object ResolvePath(string pathText, PluginTreeNode current)
 		{
-			return this.ResolvePath(pathText, null, obtainMode);
+			ObtainMode mode;
+			return this.ResolvePath(this.PreparePathText(pathText, out mode), current, mode);
 		}
 
-		internal object ResolvePath(string text, PluginTreeNode current, ObtainMode obtainMode)
+		internal object ResolvePath(string pathText, PluginTreeNode current, ObtainMode obtainMode)
 		{
 			PluginPathType pathType;
 			string path;
 			string[] memberNames;
 
-			if(!PluginPath.TryResolvePath(text, out pathType, out path, out memberNames))
-				throw new PluginException(string.Format("Resolve ‘{0}’ plugin-path was failed.", text));
+			if(!PluginPath.TryResolvePath(pathText, out pathType, out path, out memberNames))
+				throw new PluginException(string.Format("Resolve ‘{0}’ plugin-path was failed.", pathText));
 
 			PluginTreeNode node = null;
 
@@ -210,8 +212,25 @@ namespace Zongsoft.Plugins
 				if(current != null && current.Plugin != null)
 					fileName = System.IO.Path.GetFileName(current.Plugin.FilePath);
 
-				throw new PluginException(FailureCodes.InvalidPath, string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", text, fileName), ex);
+				throw new PluginException(FailureCodes.InvalidPath, string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", pathText, fileName), ex);
 			}
+		}
+		#endregion
+
+		#region 私有方法
+		private string PreparePathText(string text, out ObtainMode mode)
+		{
+			mode = ObtainMode.Auto;
+
+			if(string.IsNullOrWhiteSpace(text))
+				return text;
+
+			var parts = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+			if(parts.Length == 2)
+				Enum.TryParse<ObtainMode>(parts[1], true, out mode);
+
+			return parts[0];
 		}
 		#endregion
 	}
