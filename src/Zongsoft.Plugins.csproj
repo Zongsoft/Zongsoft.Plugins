@@ -72,6 +72,7 @@
     <Compile Include="Options\PluginSettingsProvider.cs" />
     <Compile Include="Options\PluginSettingsProviderFactory.cs" />
     <Compile Include="Parsers\ObjectParser.cs" />
+    <Compile Include="Parsers\ParserExpression.cs" />
     <Compile Include="Parsers\StaticParser.cs" />
     <Compile Include="Services\Builders\CommandTreeNodeBuilder.cs" />
     <Compile Include="IAppender.cs" />
