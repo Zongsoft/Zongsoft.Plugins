@@ -1,8 +1,8 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <9555843@qq.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -27,25 +27,20 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Zongsoft.Plugins
+namespace Zongsoft.Plugins.Parsers
 {
-	[Serializable]
-	public class PluginException : Exception
+	public class ParserException : PluginException
 	{
 		#region 构造函数
-		public PluginException()
+		public ParserException(string message) : base(message)
 		{
 		}
 
-		public PluginException(string message) : base(message, null)
+		public ParserException(string message, Exception innerException) : base(message, innerException)
 		{
 		}
 
-		public PluginException(string message, Exception innerException) : base(message, innerException)
-		{
-		}
-
-		protected PluginException(SerializationInfo info, StreamingContext context) : base(info, context)
+		protected ParserException(SerializationInfo info, StreamingContext context) : base(info, context)
 		{
 		}
 		#endregion

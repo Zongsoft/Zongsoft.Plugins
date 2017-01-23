@@ -212,7 +212,7 @@ namespace Zongsoft.Plugins
 				if(current != null && current.Plugin != null)
 					fileName = System.IO.Path.GetFileName(current.Plugin.FilePath);
 
-				throw new PluginException(FailureCodes.InvalidPath, string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", pathText, fileName), ex);
+				throw new PluginException(string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", pathText, fileName), ex);
 			}
 		}
 		#endregion

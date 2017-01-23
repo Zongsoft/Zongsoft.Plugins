@@ -113,7 +113,7 @@ namespace Zongsoft.Plugins.Builders
 
 				//如果创建器以两种方式传递过来的目标对象均不为空并且引用不相等，则抛出异常，以确保实现者返回的目标对象是明确唯一的。
 				if(target != null && context.Result != null && object.ReferenceEquals(target, context.Result) == false)
-					throw new PluginException(FailureCodes.BuiltinBuildFailed, string.Format("The builder of '{0}' builtin was faild.", context.Builtin.ToString()));
+					throw new PluginException(string.Format("The builder of '{0}' builtin was faild.", context.Builtin.ToString()));
 
 				context.Result = context.Result ?? target;
 			}

@@ -25,11 +25,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Zongsoft.Plugins.Parsers
 {
@@ -43,58 +38,48 @@ namespace Zongsoft.Plugins.Parsers
 		private Plugin _plugin;
 		private string _memberName;
 		private Type _memberType;
+		private object _parameter;
 		#endregion
 
 		#region 构造函数
-		internal ParserContext(string scheme, string text, Plugin plugin, string memberName, Type memberType)
-		{
-			if(plugin == null)
-				throw new ArgumentNullException("plugin");
-
-			this.Initialize(scheme, text, null, null, plugin, memberName, memberType);
-		}
-
-		internal ParserContext(string scheme, string text, PluginTreeNode node, string memberName, Type memberType)
+		internal ParserContext(string scheme, string text, PluginTreeNode node, string memberName, Type memberType, object parameter = null)
 		{
 			if(node == null)
 				throw new ArgumentNullException("plugin");
 
-			this.Initialize(scheme, text, null, node, node.Plugin, memberName, memberType);
+			this.Initialize(scheme, text, null, node, memberName, memberType, parameter);
 		}
 
-		internal ParserContext(string scheme, string text, Builtin builtin, string memberName, Type memberType)
+		internal ParserContext(string scheme, string text, Builtin builtin, string memberName, Type memberType, object parameter = null)
 		{
 			if(builtin == null)
 				throw new ArgumentNullException("builtin");
 
-			this.Initialize(scheme, text, builtin, null, builtin.Plugin, memberName, memberType);
+			this.Initialize(scheme, text, builtin, null, memberName, memberType, parameter);
 		}
 		#endregion
 
 		#region 初始化器
-		private void Initialize(string scheme, string text, Builtin builtin, PluginTreeNode node, Plugin plugin, string memberName, Type memberType)
+		private void Initialize(string scheme, string text, Builtin builtin, PluginTreeNode node, string memberName, Type memberType, object parameter)
 		{
 			if(string.IsNullOrWhiteSpace(scheme))
 				throw new ArgumentNullException("scheme");
 
-			if(builtin == null && node == null && plugin == null)
+			if(builtin == null && node == null)
 				throw new ArgumentException();
 
 			_scheme = scheme;
 			_text = text ?? string.Empty;
+			_parameter = parameter;
 			_memberName = memberName;
 			_memberType = memberType;
 			_builtin = builtin;
 			_node = node ?? (builtin == null ? null : builtin.Node);
-			_plugin = plugin;
 
-			if(plugin == null)
-			{
-				if(builtin == null)
-					_plugin = node.Plugin;
-				else
-					_plugin = builtin.Plugin;
-			}
+			if(builtin == null)
+				_plugin = node.Plugin;
+			else
+				_plugin = builtin.Plugin;
 		}
 		#endregion
 
@@ -118,6 +103,17 @@ namespace Zongsoft.Plugins.Parsers
 			get
 			{
 				return _text;
+			}
+		}
+
+		/// <summary>
+		/// 获取解析器的上下文的输入参数。
+		/// </summary>
+		public object Parameter
+		{
+			get
+			{
+				return _parameter;
 			}
 		}
 

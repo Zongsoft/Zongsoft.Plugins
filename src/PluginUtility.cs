@@ -289,7 +289,7 @@ namespace Zongsoft.Plugins
 											builtin.Properties[propertyName].RawValue,
 											target.GetType().AssemblyQualifiedName);
 
-					throw new PluginException(FailureCodes.BuiltinBuildFailed, message.ToString(), ex);
+					throw new PluginException(message.ToString(), ex);
 				}
 			}
 		}

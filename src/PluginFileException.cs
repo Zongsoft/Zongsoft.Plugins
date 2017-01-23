@@ -33,9 +33,8 @@ namespace Zongsoft.Plugins
 	public class PluginFileException : PluginException
 	{
 		#region 构造函数
-		public PluginFileException(string fileName) : base(string.Empty, null)
+		public PluginFileException(string message) : base(message)
 		{
-			this.FileName = fileName;
 		}
 
 		public PluginFileException(string fileName, string message) : base(message, null)
@@ -50,6 +49,7 @@ namespace Zongsoft.Plugins
 
 		protected PluginFileException(SerializationInfo info, StreamingContext context) : base(info, context)
 		{
+			this.FileName = info.GetString("FileName");
 		}
 		#endregion
 
@@ -65,7 +65,6 @@ namespace Zongsoft.Plugins
 		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
 		{
 			base.GetObjectData(info, context);
-
 			info.AddValue("FileName", this.FileName);
 		}
 		#endregion

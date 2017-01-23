@@ -741,7 +741,7 @@ namespace Zongsoft.Plugins
 				}
 
 				if(!File.Exists(filePath))
-					throw new PluginException(1, string.Format("The '{0}' assembly file is not exists. in '{1}' plugin file.", assemblyName, _plugin.FilePath));
+					throw new PluginException(string.Format("The '{0}' assembly file is not exists. in '{1}' plugin file.", assemblyName, _plugin.FilePath));
 
 				Assembly result = Assembly.LoadFrom(filePath);
 

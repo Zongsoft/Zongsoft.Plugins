@@ -72,6 +72,7 @@
     <Compile Include="Options\PluginSettingsProvider.cs" />
     <Compile Include="Options\PluginSettingsProviderFactory.cs" />
     <Compile Include="Parsers\ObjectParser.cs" />
+    <Compile Include="Parsers\ParserException.cs" />
     <Compile Include="Parsers\ParserExpression.cs" />
     <Compile Include="Parsers\StaticParser.cs" />
     <Compile Include="Services\Builders\CommandTreeNodeBuilder.cs" />
@@ -96,7 +97,6 @@
     <Compile Include="PluginExtendedPropertyCollection.cs" />
     <Compile Include="Services\Builders\ServiceProviderBuilder.cs" />
     <Compile Include="Builtin.cs" />
-    <Compile Include="FailureCodes.cs" />
     <Compile Include="IBuilder.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IsolationLevel.cs" />
