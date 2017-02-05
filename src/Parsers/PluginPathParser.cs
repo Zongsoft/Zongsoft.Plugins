@@ -31,6 +31,7 @@ namespace Zongsoft.Plugins.Parsers
 {
 	public class PluginPathParser : Parser
 	{
+		#region 公共方法
 		public override Type GetValueType(ParserContext context)
 		{
 			if(string.IsNullOrWhiteSpace(context.Text))
@@ -40,10 +41,13 @@ namespace Zongsoft.Plugins.Parsers
 			if(context.Text.StartsWith("~"))
 				return typeof(string);
 
-			var path = this.ResolveText(context.Text);
-			var node = context.PluginContext.PluginTree.Find(path);
+			var expression = PluginPath.Parse(PluginPath.PreparePathText(context.Text));
+			var node = context.Node.Find(expression.Path);
 
-			return node?.ValueType;
+			if(node != null && node.ValueType != null)
+				return Zongsoft.Common.Convert.GetMemberType(node.ValueType, expression.Members);
+
+			return null;
 		}
 
 		public override object Parse(ParserContext context)
@@ -58,30 +62,13 @@ namespace Zongsoft.Plugins.Parsers
 				return System.IO.Path.GetDirectoryName(context.Plugin.FilePath);
 
 			var mode = ObtainMode.Auto;
-			var path = this.ResolveText(context.Text, out mode);
-
-			return context.PluginContext.ResolvePath(path, context.Node, mode);
-		}
-
-		internal string ResolveText(string text)
-		{
-			ObtainMode mode;
-			return this.ResolveText(text, out mode);
-		}
-
-		internal string ResolveText(string text, out ObtainMode mode)
-		{
-			mode = ObtainMode.Auto;
+			var text = PluginPath.PreparePathText(context.Text, out mode);
 
 			if(string.IsNullOrWhiteSpace(text))
-				return text;
+				throw new PluginException($"Missing argument of the path parser.");
 
-			var parts = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-			if(parts.Length == 2)
-				Enum.TryParse<ObtainMode>(parts[1], true, out mode);
-
-			return parts[0];
+			return context.PluginContext.ResolvePath(text, context.Node, mode);
 		}
+		#endregion
 	}
 }

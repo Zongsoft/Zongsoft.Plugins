@@ -147,7 +147,6 @@ namespace Zongsoft.Plugins
 		/// <param name="pathText">要获取的路径文本，该文本可以用过句点符号(.)表示缓存对象的成员名。</param>
 		/// <returns>返回获取的缓存对象或其成员值。</returns>
 		/// <exception cref="System.ArgumentNullException"><paramref name="pathText"/>参数为空或全空字符串。</exception>
-		/// <exception cref="System.ArgumentException">参数中包含成员名，但是在该缓存对象中并没找到其成员。</exception>
 		/// <remarks>
 		/// 注意：成员名只能是公共的实例属性或字段。
 		/// <example>/Workspace/Environment/ApplicationContext.ApplicationId</example>
@@ -155,53 +154,33 @@ namespace Zongsoft.Plugins
 		public object ResolvePath(string pathText)
 		{
 			ObtainMode mode;
-			return this.ResolvePath(this.PreparePathText(pathText, out mode), null, mode);
+			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), null, mode);
 		}
 
-		internal object ResolvePath(string pathText, PluginTreeNode current)
+		internal object ResolvePath(string pathText, PluginTreeNode origin)
 		{
 			ObtainMode mode;
-			return this.ResolvePath(this.PreparePathText(pathText, out mode), current, mode);
+			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), origin, mode);
 		}
 
-		internal object ResolvePath(string pathText, PluginTreeNode current, ObtainMode obtainMode)
+		internal object ResolvePath(string pathText, PluginTreeNode origin, ObtainMode obtainMode)
 		{
-			PluginPathType pathType;
-			string path;
-			string[] memberNames;
+			if(string.IsNullOrWhiteSpace(pathText))
+				throw new ArgumentNullException(nameof(pathText));
 
-			if(!PluginPath.TryResolvePath(pathText, out pathType, out path, out memberNames))
-				throw new PluginException(string.Format("Resolve ‘{0}’ plugin-path was failed.", pathText));
+			var expression = PluginPath.Parse(pathText);
+			var node = origin.Find(expression.Path);
 
-			PluginTreeNode node = null;
-
-			switch(pathType)
-			{
-				case PluginPathType.Rooted:
-					node = _pluginTree.RootNode;
-					break;
-				case PluginPathType.Parent:
-					node = current.Parent;
-					break;
-				case PluginPathType.Current:
-					node = current;
-					break;
-			}
-
-			if(node != null && (!string.IsNullOrWhiteSpace(path)))
-				node = node.Find(path);
-
-			//注意：如果没有找到指定路径的对象不需要写日志，在ServicesParser解析中需要先在默认工厂查询指定路径的服务如果查找失败则查找服务工厂集
 			if(node == null)
-				return null;
+				throw new PluginException($"Not found node in the plugin tree for '{pathText}' path.");
 
 			try
 			{
 				//获取指定路径的目标对象
 				object target = node.UnwrapValue(obtainMode, this, null);
 
-				if(target != null && memberNames.Length > 0)
-					return Zongsoft.Common.Convert.GetValue(target, memberNames);
+				if(target != null && expression.Members.Length > 0)
+					return Zongsoft.Common.Convert.GetValue(target, expression.Members);
 
 				return target;
 			}
@@ -209,28 +188,11 @@ namespace Zongsoft.Plugins
 			{
 				var fileName = string.Empty;
 
-				if(current != null && current.Plugin != null)
-					fileName = System.IO.Path.GetFileName(current.Plugin.FilePath);
+				if(origin != null && origin.Plugin != null)
+					fileName = System.IO.Path.GetFileName(origin.Plugin.FilePath);
 
 				throw new PluginException(string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", pathText, fileName), ex);
 			}
-		}
-		#endregion
-
-		#region 私有方法
-		private string PreparePathText(string text, out ObtainMode mode)
-		{
-			mode = ObtainMode.Auto;
-
-			if(string.IsNullOrWhiteSpace(text))
-				return text;
-
-			var parts = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-			if(parts.Length == 2)
-				Enum.TryParse<ObtainMode>(parts[1], true, out mode);
-
-			return parts[0];
 		}
 		#endregion
 	}

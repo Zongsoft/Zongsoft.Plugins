@@ -108,7 +108,7 @@ namespace Zongsoft.Plugins
 				var text = ctx.Value as string;
 
 				if(text != null)
-					ctx.Value = PluginUtility.ResolveValue(_builtin, text, ctx.MemberName, ctx.MemberType, Zongsoft.Common.Convert.GetDefaultValue(ctx.MemberType));
+					ctx.Value = PluginUtility.ResolveValue(_builtin, text, ctx.MemberName, ctx.MemberType, Zongsoft.Common.TypeExtension.GetDefaultValue(ctx.MemberType));
 			});
 		}
 

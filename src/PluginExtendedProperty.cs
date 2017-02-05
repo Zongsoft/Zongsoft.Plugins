@@ -169,7 +169,7 @@ namespace Zongsoft.Plugins
 		#region 公共方法
 		public object GetValue(Type valueType)
 		{
-			object defaultValue = valueType == null ? null : Zongsoft.Common.Convert.GetDefaultValue(valueType);
+			object defaultValue = valueType == null ? null : Zongsoft.Common.TypeExtension.GetDefaultValue(valueType);
 			return this.GetValue(valueType, defaultValue);
 		}
 

@@ -40,21 +40,14 @@ namespace Zongsoft.Options.Plugins.Parsers
 			if(string.IsNullOrWhiteSpace(context.Text))
 				return null;
 
-			PluginPathType pathType;
-			string optionPath = context.Text;
-			string[] memberNames;
+			var expression = PluginPath.Parse(context.Text);
 
-			if(char.IsLetterOrDigit(optionPath[0]))
-				optionPath = '/' + optionPath;
-
-			if(PluginPath.TryResolvePath(optionPath, out pathType, out optionPath, out memberNames))
+			if(expression != null)
 			{
-				object target = context.PluginContext.ApplicationContext.OptionManager.GetOptionObject(optionPath);
+				object target = context.PluginContext.ApplicationContext.OptionManager.GetOptionObject(expression.Path);
 
-				if(target == null)
-					return null;
-
-				return Zongsoft.Common.Convert.GetValue(target, memberNames);
+				if(target != null)
+					return Zongsoft.Common.Convert.GetValue(target, expression.Members);
 			}
 
 			return null;
