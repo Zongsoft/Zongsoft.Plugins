@@ -265,10 +265,10 @@ namespace Zongsoft.Plugins
 
 				try
 				{
-					var propertyType = Zongsoft.Common.Convert.GetMemberType(target, propertyName);
+					var propertyType = Reflection.MemberAccess.GetMemberType(target, propertyName);
 					var propertyValue = builtin.Properties.GetValue(propertyName, propertyType, null);
 
-					Zongsoft.Common.Convert.SetValue(target, propertyName, propertyValue);
+					Reflection.MemberAccess.SetMemberValue(target, propertyName, propertyValue);
 				}
 				catch(Exception ex)
 				{

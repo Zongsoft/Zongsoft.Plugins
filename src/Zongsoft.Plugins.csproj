@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="Builders\BuilderBehaviourAttribute.cs" />
+    <Compile Include="Builders\BuilderBehaviorAttribute.cs" />
     <Compile Include="Builders\BuilderContext.cs" />
     <Compile Include="Builders\BuilderEventArgs.cs" />
     <Compile Include="Builders\BuilderManager.cs" />
@@ -75,12 +75,14 @@
     <Compile Include="Parsers\ParserException.cs" />
     <Compile Include="Parsers\ParserExpression.cs" />
     <Compile Include="Parsers\StaticParser.cs" />
+    <Compile Include="PluginElementProperty.cs" />
+    <Compile Include="PluginElementPropertyCollection.cs" />
     <Compile Include="Services\Builders\CommandTreeNodeBuilder.cs" />
     <Compile Include="IAppender.cs" />
     <Compile Include="BuiltinTypeConstructor.cs" />
     <Compile Include="Collections\CategoryBuilder.cs" />
     <Compile Include="ComponentModel\Builders\ComponentBuilder.cs" />
-    <Compile Include="AppenderBehaviour.cs" />
+    <Compile Include="AppenderBehavior.cs" />
     <Compile Include="AppenderContext.cs" />
     <Compile Include="ObtainMode.cs" />
     <Compile Include="Parsers\ParserContext.cs" />

@@ -68,76 +68,79 @@ namespace Zongsoft.Plugins.Tests
 			Assert.Equal(PathAnchor.None, path.Anchor);
 			Assert.Equal("workbench", path.Path);
 			Assert.Equal(1, path.Members.Length);
-			Assert.Equal("title", path.Members[0]);
+			Assert.Equal("title", path.Members[0].Name);
 
 			path = PluginPath.Parse("/workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Root, path.Anchor);
 			Assert.Equal("/workbench", path.Path);
 			Assert.Equal(1, path.Members.Length);
-			Assert.Equal("title", path.Members[0]);
+			Assert.Equal("title", path.Members[0].Name);
 
 			path = PluginPath.Parse("./workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Current, path.Anchor);
 			Assert.Equal("./workbench", path.Path);
 			Assert.Equal(1, path.Members.Length);
-			Assert.Equal("title", path.Members[0]);
+			Assert.Equal("title", path.Members[0].Name);
 
 			path = PluginPath.Parse("../workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("../workbench", path.Path);
 			Assert.Equal(1, path.Members.Length);
-			Assert.Equal("title", path.Members[0]);
+			Assert.Equal("title", path.Members[0].Name);
 
 			path = PluginPath.Parse("@workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.None, path.Anchor);
 			Assert.Equal("", path.Path);
 			Assert.Equal(2, path.Members.Length);
-			Assert.Equal("workbench", path.Members[0]);
-			Assert.Equal("title", path.Members[1]);
+			Assert.Equal("workbench", path.Members[0].Name);
+			Assert.Equal("title", path.Members[1].Name);
 
 			path = PluginPath.Parse(".@workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Current, path.Anchor);
 			Assert.Equal(".", path.Path);
 			Assert.Equal(2, path.Members.Length);
-			Assert.Equal("workbench", path.Members[0]);
-			Assert.Equal("title", path.Members[1]);
+			Assert.Equal("workbench", path.Members[0].Name);
+			Assert.Equal("title", path.Members[1].Name);
 
 			path = PluginPath.Parse("./@workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Current, path.Anchor);
 			Assert.Equal(".", path.Path);
 			Assert.Equal(2, path.Members.Length);
-			Assert.Equal("workbench", path.Members[0]);
-			Assert.Equal("title", path.Members[1]);
+			Assert.Equal("workbench", path.Members[0].Name);
+			Assert.Equal("title", path.Members[1].Name);
 
 			path = PluginPath.Parse("../@Property");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("..", path.Path);
 			Assert.Equal(1, path.Members.Length);
-			Assert.Equal("Property", path.Members[0]);
+			Assert.Equal("Property", path.Members[0].Name);
 
 			path = PluginPath.Parse("../@workbench.title");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("..", path.Path);
 			Assert.Equal(2, path.Members.Length);
-			Assert.Equal("workbench", path.Members[0]);
-			Assert.Equal("title", path.Members[1]);
+			Assert.Equal("workbench", path.Members[0].Name);
+			Assert.Equal("title", path.Members[1].Name);
 
 			path = PluginPath.Parse("../@workbench.title[0]");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("..", path.Path);
 			Assert.Equal(3, path.Members.Length);
-			Assert.Equal("workbench", path.Members[0]);
-			Assert.Equal("title", path.Members[1]);
-			Assert.Equal("[0]", path.Members[2]);
+			Assert.Equal("workbench", path.Members[0].Name);
+			Assert.Equal("title", path.Members[1].Name);
+			Assert.True(path.Members[2].IsIndexer);
+			Assert.True(string.IsNullOrEmpty(path.Members[2].Name));
+			Assert.Equal(1, path.Members[2].Parameters.Length);
+			Assert.Equal(0, path.Members[2].Parameters[0]);
 		}
 
 		[Fact]
@@ -150,33 +153,45 @@ namespace Zongsoft.Plugins.Tests
 			Assert.Equal(PathAnchor.None, path.Anchor);
 			Assert.Equal("", path.Path);
 			Assert.Equal(5, path.Members.Length);
-			Assert.Equal("[key]", path.Members[0]);
-			Assert.Equal("workbench", path.Members[1]);
-			Assert.Equal("title", path.Members[2]);
-			Assert.Equal("[0]", path.Members[3]);
-			Assert.Equal("Value", path.Members[4]);
+			Assert.True(path.Members[0].IsIndexer);
+			Assert.Equal(1, path.Members[0].Parameters.Length);
+			Assert.Equal("key", path.Members[0].Parameters[0]);
+			Assert.Equal("workbench", path.Members[1].Name);
+			Assert.Equal("title", path.Members[2].Name);
+			Assert.True(path.Members[3].IsIndexer);
+			Assert.Equal(1, path.Members[3].Parameters.Length);
+			Assert.Equal(0, path.Members[3].Parameters[0]);
+			Assert.Equal("Value", path.Members[4].Name);
 
 			path = PluginPath.Parse("../@[key].workbench.title[0].Value");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("..", path.Path);
 			Assert.Equal(5, path.Members.Length);
-			Assert.Equal("[key]", path.Members[0]);
-			Assert.Equal("workbench", path.Members[1]);
-			Assert.Equal("title", path.Members[2]);
-			Assert.Equal("[0]", path.Members[3]);
-			Assert.Equal("Value", path.Members[4]);
+			Assert.True(path.Members[0].IsIndexer);
+			Assert.Equal(1, path.Members[0].Parameters.Length);
+			Assert.Equal("key", path.Members[0].Parameters[0]);
+			Assert.Equal("workbench", path.Members[1].Name);
+			Assert.Equal("title", path.Members[2].Name);
+			Assert.True(path.Members[3].IsIndexer);
+			Assert.Equal(1, path.Members[3].Parameters.Length);
+			Assert.Equal(0, path.Members[3].Parameters[0]);
+			Assert.Equal("Value", path.Members[4].Name);
 
 			path = PluginPath.Parse(@".. / @ [ 'k\' ey' ] . workbench . title[ 0  ].Value");
 			Assert.NotNull(path);
 			Assert.Equal(PathAnchor.Parent, path.Anchor);
 			Assert.Equal("..", path.Path);
 			Assert.Equal(5, path.Members.Length);
-			Assert.Equal(@"['k' ey']", path.Members[0]);
-			Assert.Equal("workbench", path.Members[1]);
-			Assert.Equal("title", path.Members[2]);
-			Assert.Equal("[0]", path.Members[3]);
-			Assert.Equal("Value", path.Members[4]);
+			Assert.True(path.Members[0].IsIndexer);
+			Assert.Equal(1, path.Members[0].Parameters.Length);
+			Assert.Equal("k' ey", path.Members[0].Parameters[0]);
+			Assert.Equal("workbench", path.Members[1].Name);
+			Assert.Equal("title", path.Members[2].Name);
+			Assert.True(path.Members[3].IsIndexer);
+			Assert.Equal(1, path.Members[3].Parameters.Length);
+			Assert.Equal(0, path.Members[3].Parameters[0]);
+			Assert.Equal("Value", path.Members[4].Name);
 		}
 	}
 }

@@ -180,7 +180,7 @@ namespace Zongsoft.Plugins
 				object target = node.UnwrapValue(obtainMode, this, null);
 
 				if(target != null && expression.Members.Length > 0)
-					return Zongsoft.Common.Convert.GetValue(target, expression.Members);
+					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);
 
 				return target;
 			}

@@ -47,15 +47,15 @@ namespace Zongsoft.Plugins
 		#region 成员字段
 		private string _path;
 		private string[] _segments;
-		private string[] _members;
+		private Reflection.MemberToken[] _members;
 		private Zongsoft.IO.PathAnchor _anchor;
 		#endregion
 
 		#region 构造函数
-		private PluginPath(string[] segments, string[] members)
+		private PluginPath(string[] segments, Reflection.MemberToken[] members)
 		{
 			_segments = segments ?? new string[0];
-			_members = members ?? new string[0];
+			_members = members ?? new Reflection.MemberToken[0];
 			_anchor = IO.PathAnchor.None;
 			_path = string.Empty;
 
@@ -117,9 +117,9 @@ namespace Zongsoft.Plugins
 		}
 
 		/// <summary>
-		/// 获取插件路径表达式中的成员名数组。
+		/// 获取插件路径表达式中的成员项数组。
 		/// </summary>
-		public string[] Members
+		public Reflection.MemberToken[] Members
 		{
 			get
 			{
@@ -206,7 +206,7 @@ namespace Zongsoft.Plugins
 									parts.Add(part);
 									part = string.Empty;
 
-									return new PluginPath(parts.ToArray(), ParseMembers(text, i + 1, message => onError?.Invoke(message)));
+									return new PluginPath(parts.ToArray(), Reflection.MemberAccess.Resolve(text.Substring(i + 1), message => onError?.Invoke(message)));
 							}
 						}
 						else
@@ -220,7 +220,7 @@ namespace Zongsoft.Plugins
 							parts.Add(part);
 							part = string.Empty;
 
-							return new PluginPath(parts.ToArray(), ParseMembers(text, i + 1, message => onError?.Invoke(message)));
+							return new PluginPath(parts.ToArray(), Reflection.MemberAccess.Resolve(text.Substring(i + 1), message => onError?.Invoke(message)));
 						}
 
 						spaces = 0;
@@ -255,7 +255,7 @@ namespace Zongsoft.Plugins
 							part = string.Empty;
 						}
 
-						return new PluginPath(parts.ToArray(), ParseMembers(text, i + (chr == '[' ? 0 : 1), message => onError?.Invoke(message)));
+						return new PluginPath(parts.ToArray(), Reflection.MemberAccess.Resolve(text.Substring(i + (chr == '[' ? 0 : 1)), message => onError?.Invoke(message)));
 					case ' ':
 						if(part.Length > 0)
 							spaces++;
@@ -281,195 +281,6 @@ namespace Zongsoft.Plugins
 				return null;
 
 			return new PluginPath(parts.ToArray(), null);
-		}
-
-		private static string[] ParseMembers(string text, int offset, Action<string> onError)
-		{
-			if(offset < 0 || offset >= text.Length)
-				return null;
-
-			var part = string.Empty;
-			var parts = new List<string>();
-			var quote = '\0';
-			var escaping = false;
-			var spaces = 0;
-
-			for(int i = offset; i < text.Length; i++)
-			{
-				var chr = text[i];
-
-				if(quote != '\0')
-				{
-					if(escaping)
-					{
-						char escapedChar;
-
-						if(EscapeChar(chr, out escapedChar))
-							part += escapedChar;
-						else
-							part += '\\' + chr;
-					}
-					else
-					{
-						if(chr == quote)
-							quote = '\0';
-
-						if(chr != '\\')
-							part += chr;
-					}
-
-					//转义状态只有在引号里面才可能发生
-					escaping = chr == '\\' && !escaping;
-				}
-				else
-				{
-					switch(chr)
-					{
-						case '.':
-							if(part.Length > 0 && part[0] == '[')
-							{
-								onError?.Invoke($"Missing matched ']' symbol in the \"{text}\" path expression.");
-								return null;
-							}
-
-							spaces = 0;
-
-							if(part.Length > 0)
-							{
-								parts.Add(part);
-								part = string.Empty;
-							}
-
-							break;
-						case '"':
-						case '\'':
-							if(part.Length != 1 || part[0] != '[')
-							{
-								onError?.Invoke($"The quotation mark must be in indexer symbol.");
-								return null;
-							}
-
-							spaces = 0;
-							quote = chr;
-							part += chr;
-
-							break;
-						case '\\':
-							onError?.Invoke($"The escaping character(\\) must be in quotes.");
-							return null;
-						case '[':
-							if(part.Length > 0)
-								parts.Add(part);
-
-							spaces = 0;
-							part = "[";
-
-							break;
-						case ']':
-							if(part.Length == 0 || part[0] != '[')
-							{
-								onError?.Invoke($"Missing matched '[' symbol in the \"{text}\" path expresion.");
-								return null;
-							}
-
-							spaces = 0;
-							parts.Add(part + chr);
-							part = string.Empty;
-
-							break;
-						default:
-							if(char.IsWhiteSpace(chr))
-							{
-								//忽略成员前面的空白字符，或者字符[后面的空格
-								if(part.Length == 0 || (part.Length == 1 && part[0] == '['))
-									break;
-
-								spaces++;
-							}
-							else if(char.IsLetter(chr) || chr == '_')
-							{
-								if(spaces > 0)
-								{
-									onError?.Invoke($"The member part contains one or many whitespaces.");
-									return null;
-								}
-
-								part += chr;
-							}
-							else if(char.IsDigit(chr))
-							{
-								if(part.Length == 0)
-								{
-									onError?.Invoke("The first character of member part must be a letter or underscore(_).");
-									return null;
-								}
-
-								if(spaces > 0)
-								{
-									onError?.Invoke($"The member part contains whitespaces.");
-									return null;
-								}
-
-								part += chr;
-							}
-							else
-							{
-								onError?.Invoke($"Contains a '{chr}' illegal character in the \"{text}\" path expression.");
-								return null;
-							}
-							break;
-					}
-				}
-			}
-
-			//如果还处在引号里面，则激发错误
-			if(quote != '\0')
-			{
-				onError?.Invoke($"Missing closing quotation mark in the \"{text}\" path expression.");
-				return null;
-			}
-
-			if(part.Length > 0)
-			{
-				if(part[0] == '[' && part[part.Length - 1] != ']')
-				{
-					onError?.Invoke($"Missing matched ']' symbol in the \"{text}\" path expression.");
-					return null;
-				}
-
-				parts.Add(part);
-			}
-
-			return parts.ToArray();
-		}
-
-		private static bool EscapeChar(char chr, out char escapedChar)
-		{
-			switch(chr)
-			{
-				case '"':
-				case '\'':
-				case '\\':
-				case '[':
-				case ']':
-					escapedChar = chr;
-					return true;
-				case 's':
-					escapedChar = ' ';
-					return true;
-				case 't':
-					escapedChar = '\t';
-					return true;
-				case 'n':
-					escapedChar = '\n';
-					return true;
-				case 'r':
-					escapedChar = '\r';
-					return true;
-			}
-
-			escapedChar = chr;
-			return false;
 		}
 
 		private static bool IsIllegalPathChars(char chr)

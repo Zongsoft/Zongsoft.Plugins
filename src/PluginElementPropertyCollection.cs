@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2010-2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -29,31 +29,24 @@ using System.Collections.ObjectModel;
 
 namespace Zongsoft.Plugins
 {
-	public class BuiltinBehaviorCollection : KeyedCollection<string, BuiltinBehavior>
+	public class PluginElementPropertyCollection : KeyedCollection<string, PluginElementProperty>
 	{
 		#region 成员字段
-		private Builtin _builtin;
+		private PluginElement _owner;
 		#endregion
 
 		#region 构造函数
-		public BuiltinBehaviorCollection(Builtin builtin) : base(StringComparer.OrdinalIgnoreCase)
+		public PluginElementPropertyCollection(PluginElement owner) : base(StringComparer.OrdinalIgnoreCase)
 		{
-			if(builtin == null)
-				throw new ArgumentNullException(nameof(builtin));
+			if(owner == null)
+				throw new ArgumentNullException(nameof(owner));
 
-			_builtin = builtin;
+			_owner = owner;
 		}
 		#endregion
 
 		#region 公共方法
-		public BuiltinBehavior Add(string name, string text = null)
-		{
-			var result = new BuiltinBehavior(_builtin, name, text);
-			this.Add(result);
-			return result;
-		}
-
-		public bool TryGet(string name, out BuiltinBehavior value)
+		public bool TryGet(string name, out PluginElementProperty value)
 		{
 			value = null;
 
@@ -74,38 +67,42 @@ namespace Zongsoft.Plugins
 			return false;
 		}
 
-		public T GetBehaviorValue<T>(string name, T defaultValue = default(T))
+		public bool Set(string name, string rawValue)
 		{
 			if(string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 
-			var index = name.IndexOf('.');
+			var dictionary = this.Dictionary;
 
-			if(index < 0 || index >= name.Length - 1)
-				throw new ArgumentException();
+			if(dictionary != null)
+			{
+				PluginElementProperty property;
 
-			BuiltinBehavior behavior = null;
+				if(dictionary.TryGetValue(name, out property))
+				{
+					property.RawValue = rawValue;
+					return true;
+				}
+			}
 
-			if(this.TryGet(name.Substring(0, index), out behavior))
-				return behavior.GetPropertyValue<T>(name.Substring(index + 1), defaultValue);
-
-			return defaultValue;
+			this.Add(new PluginElementProperty(_owner, name, rawValue));
+			return false;
 		}
 		#endregion
 
 		#region 重写方法
-		protected override string GetKeyForItem(BuiltinBehavior item)
+		protected override string GetKeyForItem(PluginElementProperty item)
 		{
 			return item.Name;
 		}
 
-		protected override void InsertItem(int index, BuiltinBehavior item)
+		protected override void InsertItem(int index, PluginElementProperty item)
 		{
 			if(item == null)
 				throw new ArgumentNullException(nameof(item));
 
 			//设置属性的所有者
-			item.Builtin = _builtin;
+			item.Owner = _owner;
 
 			//调用基类同名方法
 			base.InsertItem(index, item);

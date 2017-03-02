@@ -29,7 +29,7 @@ using System.ComponentModel;
 
 namespace Zongsoft.Plugins
 {
-	public enum AppenderBehaviour
+	public enum AppenderBehavior
 	{
 		[Description("追加")]
 		Append,

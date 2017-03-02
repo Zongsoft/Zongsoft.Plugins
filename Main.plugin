@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <plugin name="Main"
         title="Main Plugin"
         author="Popeye Zhong(zongsoft@gmail.com)"
-        version="4.4.0.1611"
-        copyright="Copyright (C) 2012-2016 Zongsoft Corporation. All rights reserved."
-        description="Created Date: 2012-06-09 by Popeye Zhong, Modified Date: 2016-11-25 by Popeye Zhong.">
+        version="4.4.0.1703"
+        copyright="Copyright (C) 2012-2017 Zongsoft Corporation. All rights reserved."
+        description="Created Date: 2012-06-09 by Popeye Zhong, Modified Date: 2017-03-01 by Popeye Zhong.">
 
 	<manifest>
 		<assemblies>
@@ -51,7 +51,7 @@
 		<!-- 设置文件目录系统的服务容器 -->
 		<object name="FileSystem" type="Zongsoft.Services.Plugins.PluginServiceProvider, Zongsoft.Plugins">
 			<!-- 设置构件行为特性：将当前服务容器赋值给文件系统的静态属性 -->
-			<object.property name="Providers" type="Zongsoft.IO.FileSystem, Zongsoft.CoreLibrary" value="{path:.}" />
+			<object.property name="Providers" target="{type:Zongsoft.IO.FileSystem, Zongsoft.CoreLibrary}" value="{path:.}" />
 
 			<!-- 挂载本地文件目录系统 -->
 			<object name="LocalFileSystem" value="{static:Zongsoft.IO.LocalFileSystem.Instance, Zongsoft.CoreLibrary}" />
@@ -60,10 +60,6 @@
 		<!-- 设置选项扩展点 -->
 		<object name="Options" value="{path:/Workspace/Environment/ApplicationContext.OptionManager.RootNode}">
 			<option name="Environment" title="{res:Text.Environment}" />
-
-			<option name="Communication" title="{res:Text.Communication}">
-				<option name="Net" title="{res:Text.Net}" />
-			</option>
 		</object>
 	</extension>
 
@@ -84,12 +80,6 @@
 		<object value="{path:/Workspace/Services/Providers}" />
 	</extension>
 
-	<!-- 挂载服务提供程序 -->
-	<extension path="/Workspace/Services/Providers">
-		<serviceProvider name="Data" />
-		<serviceProvider name="Communication" />
-	</extension>
-
 	<!-- 挂载默认服务容器下的各个服务 -->
 	<extension path="/Workspace/Services">
 		<object name="Queue" minimumGrow="256" type="Zongsoft.Collections.Queue, Zongsoft.CoreLibrary">
@@ -101,10 +91,6 @@
 		</object>
 
 		<object name="HasCollection" type="Zongsoft.Collections.Plugins.HasCollectionPredication, Zongsoft.Plugins" />
-
-		<!-- 链接外部服务提供程序 -->
-		<link ref="../Providers/Data" />
-		<link ref="../Providers/Communication" />
 	</extension>
 
 	<!-- 挂载命令执行器 -->
@@ -121,44 +107,5 @@
 				</commandNode>
 			</object>
 		</object>
-	</extension>
-
-	<!-- 挂载通讯业务 -->
-	<extension path="/Workspace/Communication">
-		<object name="TcpServer" type="Zongsoft.Communication.Net.TcpServer, Zongsoft.CoreLibrary">
-			<object name="Executor" value="{path:../@Executor}">
-				<object name="Filters" value="{path:../@Filters}" />
-				<object name="Pipelines" value="{path:../@Pipelines}" />
-			</object>
-		</object>
-
-		<object name="TcpClient" type="Zongsoft.Communication.Net.TcpClient, Zongsoft.CoreLibrary">
-			<object name="Executor" value="{path:../@Executor}">
-				<object name="Filters" value="{path:../@Filters}" />
-				<object name="Pipelines" value="{path:../@Pipelines}" />
-			</object>
-		</object>
-
-		<object name="FtpServer" configuration="{opt:/Communication/Net/FtpServer}" type="Zongsoft.Communication.Net.FtpServer, Zongsoft.CoreLibrary">
-			<object name="Executor" value="{path:../@Executor}">
-				<object name="Filters" value="{path:../@Filters}" />
-				<object name="Pipelines" value="{path:../@Pipelines}" />
-			</object>
-		</object>
-
-		<object name="FtpClient" type="Zongsoft.Communication.Net.FtpClient, Zongsoft.CoreLibrary" />
-	</extension>
-
-	<!-- 挂载“通讯”相关的选项配置 -->
-	<extension path="/Workbench/Options/Communication/Net">
-		<option name="FtpServer" title="{res:Text.FtpServer}" provider="application" />
-	</extension>
-
-	<!-- 挂载“通讯”相关的各种服务 -->
-	<extension path="/Workspace/Services/Communication">
-		<object name="TcpServer" value="{path:/Workspace/Communication/TcpServer}" />
-		<object name="TcpClient" value="{path:/Workspace/Communication/TcpClient}" />
-		<object name="FtpServer" value="{path:/Workspace/Communication/FtpServer}" />
-		<object name="FtpClient" value="{path:/Workspace/Communication/FtpClient}" />
 	</extension>
 </plugin>

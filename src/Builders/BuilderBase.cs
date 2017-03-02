@@ -25,11 +25,7 @@
  */
 
 using System;
-using System.Reflection;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Zongsoft.Plugins.Builders
 {
@@ -72,7 +68,7 @@ namespace Zongsoft.Plugins.Builders
 			if(builtin != null && builtin.BuiltinType != null)
 				return builtin.BuiltinType.Type;
 
-			var attribute = (Builders.BuilderBehaviourAttribute)Attribute.GetCustomAttribute(this.GetType(), typeof(Builders.BuilderBehaviourAttribute), true);
+			var attribute = (Builders.BuilderBehaviorAttribute)Attribute.GetCustomAttribute(this.GetType(), typeof(Builders.BuilderBehaviorAttribute), true);
 
 			if(attribute != null)
 				return attribute.ValueType;
@@ -140,16 +136,13 @@ namespace Zongsoft.Plugins.Builders
 		#region 虚拟方法
 		protected virtual void ApplyBehaviors(BuilderContext context)
 		{
-			var behavior = context.Builtin.Behaviors["property"];
+			BuiltinBehavior behavior = null;
 
-			if(behavior != null)
+			if(context.Builtin.HasBehaviors && context.Builtin.Behaviors.TryGet("property", out behavior))
 			{
-				var propertyBehavior = behavior.Populate<PropertyBehavior>();
-
-				if(propertyBehavior == null)
-					throw new PluginException();
-
-				propertyBehavior.Apply();
+				var path = behavior.GetPropertyValue<string>("name");
+				var target = behavior.GetPropertyValue<object>("target");
+				Zongsoft.Reflection.MemberAccess.SetMemberValue(target, path, () => behavior.GetPropertyValue<object>("value"));
 			}
 		}
 
@@ -161,7 +154,7 @@ namespace Zongsoft.Plugins.Builders
 			var appender = context.OwnerNode.Plugin.GetBuilder(((Builtin)context.OwnerNode.Value).BuilderName) as IAppender;
 
 			if(appender != null)
-				appender.Append(new AppenderContext(context.PluginContext, context.Result, context.Node, context.Owner, context.OwnerNode, AppenderBehaviour.Append));
+				appender.Append(new AppenderContext(context.PluginContext, context.Result, context.Node, context.Owner, context.OwnerNode, AppenderBehavior.Append));
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -174,57 +167,6 @@ namespace Zongsoft.Plugins.Builders
 		{
 			this.ApplyBehaviors(context);
 			this.OnBuilt(context);
-		}
-		#endregion
-
-		#region 嵌套子类
-		private class PropertyBehavior
-		{
-			public string Type
-			{
-				get;
-				set;
-			}
-
-			public object Target
-			{
-				get;
-				set;
-			}
-
-			public string Name
-			{
-				get;
-				set;
-			}
-
-			public object Value
-			{
-				get;
-				set;
-			}
-
-			public void Apply()
-			{
-				if(string.IsNullOrWhiteSpace(this.Name))
-					throw new PluginException();
-
-				var type = this.Target == null ? PluginUtility.GetType(this.Type) : this.Target.GetType();
-				var member = type.GetMember(this.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.SetField | BindingFlags.SetProperty).FirstOrDefault();
-
-				if(member == null)
-					throw new PluginException();
-
-				switch(member.MemberType)
-				{
-					case MemberTypes.Field:
-						((FieldInfo)member).SetValue(this.Target, this.Value);
-						break;
-					case MemberTypes.Property:
-						((PropertyInfo)member).SetValue(this.Target, this.Value);
-						break;
-				}
-			}
 		}
 		#endregion
 	}

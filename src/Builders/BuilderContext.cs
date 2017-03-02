@@ -25,8 +25,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Zongsoft.Plugins.Builders
 {
@@ -58,7 +56,7 @@ namespace Zongsoft.Plugins.Builders
 			_ownerNode = ownerNode;
 
 			if(builtin.HasBehaviors)
-				_cancel = builtin.Behaviors.GetBehaviorValue<bool>("behavior.interrupted", false);
+				_cancel = builtin.Behaviors.GetBehaviorValue<bool>(builtin.BuilderName + ".break");
 
 			_syncRoot = new object();
 		}

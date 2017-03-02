@@ -304,7 +304,7 @@ namespace Zongsoft.Plugins
 		/// </summary>
 		/// <returns>如果<see cref="HasValue"/>为真(true)则返回<see cref="Value"/>属性值的类型，否则根据当前构件的插件类型声明进行类型解析。</returns>
 		/// <remarks>
-		///		<para>对于自定义构建器的目标类型，将由构建器标注的<seealso cref="Builders.BuilderBehaviourAttribute"/>特性提供，详情请参考它的描述信息。</para>
+		///		<para>对于自定义构建器的目标类型，将由构建器标注的<seealso cref="Builders.BuilderBehaviorAttribute"/>特性提供，详情请参考它的描述信息。</para>
 		/// </remarks>
 		public Type GetValueType()
 		{
@@ -323,7 +323,7 @@ namespace Zongsoft.Plugins
 				if(result != null)
 					return result;
 
-				var attribute = (Builders.BuilderBehaviourAttribute)Attribute.GetCustomAttribute(builder.GetType(), typeof(Builders.BuilderBehaviourAttribute), true);
+				var attribute = (Builders.BuilderBehaviorAttribute)Attribute.GetCustomAttribute(builder.GetType(), typeof(Builders.BuilderBehaviorAttribute), true);
 
 				if(attribute != null)
 					return attribute.ValueType;

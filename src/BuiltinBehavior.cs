@@ -35,22 +35,22 @@ namespace Zongsoft.Plugins
 		private Builtin _builtin;
 		private string _name;
 		private string _text;
-		private IDictionary<string, string> _properties;
+		private PluginElementPropertyCollection _properties;
 		#endregion
 
 		#region 构造函数
 		public BuiltinBehavior(Builtin builtin, string name, string text = null)
 		{
 			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+				throw new ArgumentNullException(nameof(builtin));
 
 			if(string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 
 			_builtin = builtin;
 			_name = name.Trim();
 			_text = text;
-			_properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			_properties = new PluginElementPropertyCollection(builtin);
 		}
 		#endregion
 
@@ -60,6 +60,10 @@ namespace Zongsoft.Plugins
 			get
 			{
 				return _builtin;
+			}
+			internal set
+			{
+				_builtin = value;
 			}
 		}
 
@@ -83,7 +87,7 @@ namespace Zongsoft.Plugins
 			}
 		}
 
-		public IDictionary<string, string> Properties
+		public PluginElementPropertyCollection Properties
 		{
 			get
 			{
@@ -93,34 +97,15 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 公共方法
-		public T Populate<T>(Func<T> creator = null)
-		{
-			var dictionary = Zongsoft.Collections.DictionaryExtension.ToDictionary<string, object>((System.Collections.IDictionary)_properties);
-
-			return Zongsoft.Runtime.Serialization.DictionarySerializer.Default.Deserialize<T>((System.Collections.IDictionary)dictionary, creator, ctx =>
-			{
-				if(ctx.Direction == Common.Convert.ObjectResolvingDirection.Get)
-				{
-					ctx.Handled = false;
-					return;
-				}
-
-				var text = ctx.Value as string;
-
-				if(text != null)
-					ctx.Value = PluginUtility.ResolveValue(_builtin, text, ctx.MemberName, ctx.MemberType, Zongsoft.Common.TypeExtension.GetDefaultValue(ctx.MemberType));
-			});
-		}
-
 		public T GetPropertyValue<T>(string propertyName, T defaultValue = default(T))
 		{
 			if(string.IsNullOrWhiteSpace(propertyName))
 				throw new ArgumentNullException("propertyName");
 
-			string rawValue;
+			PluginElementProperty property;
 
-			if(_properties.TryGetValue(propertyName, out rawValue))
-				return Zongsoft.Common.Convert.ConvertValue<T>(PluginUtility.ResolveValue(_builtin, rawValue, propertyName, typeof(T), defaultValue));
+			if(_properties.TryGet(propertyName, out property))
+				return (T)property.GetValue(typeof(T), defaultValue);
 
 			return defaultValue;
 		}
@@ -130,10 +115,10 @@ namespace Zongsoft.Plugins
 			if(string.IsNullOrWhiteSpace(propertyName))
 				throw new ArgumentNullException("propertyName");
 
-			string rawValue;
+			PluginElementProperty property;
 
-			if(_properties.TryGetValue(propertyName, out rawValue))
-				return PluginUtility.ResolveValue(_builtin, rawValue, propertyName, valueType, defaultValue);
+			if(_properties.TryGet(propertyName, out property))
+				return property.GetValue(valueType, defaultValue);
 
 			return defaultValue;
 		}

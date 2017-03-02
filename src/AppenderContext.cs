@@ -37,7 +37,7 @@ namespace Zongsoft.Plugins
 
 		#region 成员字段
 		private PluginContext _pluginContext;
-		private AppenderBehaviour _behaviour;
+		private AppenderBehavior _behaviour;
 		private object _value;
 		private object _container;
 		private PluginTreeNode _node;
@@ -45,7 +45,7 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 构造函数
-		internal AppenderContext(PluginContext pluginContext, object value, PluginTreeNode node, object container, PluginTreeNode containerNode, AppenderBehaviour behaviour)
+		internal AppenderContext(PluginContext pluginContext, object value, PluginTreeNode node, object container, PluginTreeNode containerNode, AppenderBehavior behaviour)
 		{
 			if(pluginContext == null)
 				throw new ArgumentNullException("pluginContext");
@@ -67,7 +67,7 @@ namespace Zongsoft.Plugins
 		/// <summary>
 		/// 获取当前处理器被激发的原因。
 		/// </summary>
-		public AppenderBehaviour Behaviour
+		public AppenderBehavior Behaviour
 		{
 			get
 			{

@@ -419,8 +419,8 @@ namespace Zongsoft.Plugins
 				{
 					foreach(PluginExtendedProperty property in properties)
 					{
-						var propertyType = Zongsoft.Common.Convert.GetMemberType(_value, property.Name);
-						Zongsoft.Common.Convert.SetValue(_value, property.Name, property.GetValue(propertyType));
+						var propertyType = Reflection.MemberAccess.GetMemberType(_value, property.Name);
+						Reflection.MemberAccess.SetMemberValue(_value, property.Name, property.GetValue(propertyType));
 					}
 				}
 			}

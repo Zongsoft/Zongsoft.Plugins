@@ -210,24 +210,6 @@ namespace Zongsoft.Services.Plugins.Parsers
 			//返回以当前构件的父节点名称为服务容器名的那个服务容器，如果该服务容器不存在则返回默认服务容器
 			return serviceFactory.GetProvider(context.Node.Parent.Name) ?? serviceFactory.Default;
 		}
-
-		private object ResolveService(string serviceName, Func<object> serviceThunk)
-		{
-			if(serviceThunk == null)
-				return null;
-
-			if(string.IsNullOrWhiteSpace(serviceName))
-				return serviceThunk();
-
-			var parts = serviceName.Split('.');
-
-			if(parts.Length == 1)
-				return serviceThunk();
-
-			var members = new string[parts.Length - 1];
-			Array.Copy(parts, 1, members, 0, members.Length);
-			return Zongsoft.Common.Convert.GetValue(serviceThunk(), members);
-		}
 		#endregion
 	}
 }

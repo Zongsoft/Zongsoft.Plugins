@@ -575,7 +575,7 @@ namespace Zongsoft.Plugins
 			for(int i = 0; i < reader.AttributeCount; i++)
 			{
 				reader.MoveToAttribute(i);
-				behavior.Properties[reader.Name] = reader.Value;
+				behavior.Properties.Set(reader.Name, reader.Value);
 			}
 
 			if(reader.NodeType == XmlNodeType.Attribute)

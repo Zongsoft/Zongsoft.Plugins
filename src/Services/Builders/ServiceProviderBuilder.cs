@@ -32,7 +32,7 @@ using Zongsoft.Plugins.Builders;
 
 namespace Zongsoft.Services.Plugins.Builders
 {
-	[BuilderBehaviour(typeof(PluginServiceProvider))]
+	[BuilderBehavior(typeof(PluginServiceProvider))]
 	public class ServiceProviderBuilder : Zongsoft.Plugins.Builders.BuilderBase
 	{
 		#region 重写方法

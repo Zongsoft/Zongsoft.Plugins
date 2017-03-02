@@ -36,14 +36,14 @@ namespace Zongsoft.Plugins.Builders
 	///		<para>在特定情况建议使用该类对构建器进行定制。</para>
 	/// </remarks>
 	[AttributeUsage(AttributeTargets.Class)]
-	public class BuilderBehaviourAttribute : Attribute
+	public class BuilderBehaviorAttribute : Attribute
 	{
 		#region 成员字段
 		private Type _valueType;
 		#endregion
 
 		#region 构造函数
-		public BuilderBehaviourAttribute(Type valueType)
+		public BuilderBehaviorAttribute(Type valueType)
 		{
 			if(valueType == null)
 				throw new ArgumentNullException("valueType");

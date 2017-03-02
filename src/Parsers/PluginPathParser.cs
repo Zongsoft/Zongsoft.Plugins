@@ -45,7 +45,7 @@ namespace Zongsoft.Plugins.Parsers
 			var node = context.Node.Find(expression.Path);
 
 			if(node != null && node.ValueType != null)
-				return Zongsoft.Common.Convert.GetMemberType(node.ValueType, expression.Members);
+				return Reflection.MemberAccess.GetMemberType(node.ValueType, expression.Members);
 
 			return null;
 		}

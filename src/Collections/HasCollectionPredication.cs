@@ -47,7 +47,7 @@ namespace Zongsoft.Collections.Plugins
 			if(string.IsNullOrWhiteSpace(context.Parameter))
 				collection = target as ICollection;
 			else
-				collection = Zongsoft.Common.Convert.GetValue(target, context.Parameter) as ICollection;
+				collection = Reflection.MemberAccess.GetMemberValue<object>(target, context.Parameter) as ICollection;
 
 			return collection != null && collection.Count > 0;
 		}
