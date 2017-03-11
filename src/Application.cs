@@ -264,8 +264,8 @@ namespace Zongsoft.Plugins
 
 			foreach(var module in context.Modules)
 			{
-				if(module != null)
-					module.Dispose();
+				if(module != null && module is IDisposable)
+					((IDisposable)module).Dispose();
 			}
 		}
 
@@ -303,7 +303,12 @@ namespace Zongsoft.Plugins
 				foreach(FixedElement<IApplicationModule> module in plugin.Modules)
 				{
 					if(module.HasValue)
-						module.Value.Dispose();
+					{
+						var disposable = module.Value as IDisposable;
+
+						if(disposable != null)
+							disposable.Dispose();
+					}
 				}
 			}
 		}

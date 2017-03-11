@@ -25,7 +25,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using Zongsoft.Plugins;
@@ -85,12 +84,6 @@ namespace Zongsoft.Options.Plugins
 
 			if(found != null)
 				providers.Remove(found);
-		}
-		#endregion
-
-		#region 释放资源
-		void IDisposable.Dispose()
-		{
 		}
 		#endregion
 
