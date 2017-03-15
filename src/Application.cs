@@ -239,7 +239,7 @@ namespace Zongsoft.Plugins
 
 			if(configuration != null)
 			{
-				var modules = configuration.GetOptionObject("/modules") as Zongsoft.Options.Configuration.ModuleElementCollection;
+				var modules = configuration.GetOptionValue("/modules") as Zongsoft.Options.Configuration.ModuleElementCollection;
 
 				if(modules != null && modules.Count > 0)
 				{

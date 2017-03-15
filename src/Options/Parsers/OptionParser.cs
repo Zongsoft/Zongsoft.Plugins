@@ -44,7 +44,7 @@ namespace Zongsoft.Options.Plugins.Parsers
 
 			if(expression != null)
 			{
-				object target = context.PluginContext.ApplicationContext.OptionManager.GetOptionObject(expression.Path);
+				object target = context.PluginContext.ApplicationContext.OptionManager.GetOptionValue(expression.Path);
 
 				if(target != null)
 					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);

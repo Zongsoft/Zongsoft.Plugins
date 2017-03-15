@@ -45,7 +45,7 @@ namespace Zongsoft.Options.Plugins
 		{
 			_plugin = plugin;
 			_configuration = configuration;
-			_settings = (ISettingsProvider)_configuration.GetOptionObject("/settings");
+			_settings = (ISettingsProvider)_configuration.GetOptionValue("/settings");
 		}
 		#endregion
 

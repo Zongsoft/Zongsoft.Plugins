@@ -153,22 +153,22 @@ namespace Zongsoft.Options.Plugins
 			#endregion
 
 			#region 公共方法
-			public object GetOptionObject(string path)
+			public object GetOptionValue(string text)
 			{
 				var configuration = _proxy.Value;
 
 				if(configuration != null)
-					return configuration.GetOptionObject(path);
+					return configuration.GetOptionValue(text);
 
 				return null;
 			}
 
-			public void SetOptionObject(string path, object optionObject)
+			public void SetOptionValue(string text, object value)
 			{
 				var configuration = _proxy.Value;
 
 				if(configuration != null)
-					configuration.SetOptionObject(path, optionObject);
+					configuration.SetOptionValue(text, value);
 			}
 			#endregion
 		}
