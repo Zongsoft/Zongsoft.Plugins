@@ -154,7 +154,7 @@ namespace Zongsoft.Plugins
 		public object ResolvePath(string pathText)
 		{
 			ObtainMode mode;
-			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), null, mode);
+			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), this.PluginTree.RootNode, mode);
 		}
 
 		internal object ResolvePath(string pathText, PluginTreeNode origin)
