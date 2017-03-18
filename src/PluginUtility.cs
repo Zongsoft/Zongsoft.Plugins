@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2010-2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -265,9 +265,19 @@ namespace Zongsoft.Plugins
 
 				try
 				{
-					var propertyType = Reflection.MemberAccess.GetMemberType(target, propertyName);
+					Type propertyType;
+
+					//如果构件中当前属性名在目标对象中不存在则忽略
+					if(!Reflection.MemberAccess.TryGetMemberType(target, propertyName, out propertyType))
+					{
+						Zongsoft.Diagnostics.Logger.Warn($"The '{propertyName}' property of '{builtin}' builtin is not existed on '{target.GetType().FullName}' target.");
+						continue;
+					}
+
+					//获取构件中当前属性的值
 					var propertyValue = builtin.Properties.GetValue(propertyName, propertyType, null);
 
+					//将构件中当前属性值更新目标对象的对应属性中
 					Reflection.MemberAccess.SetMemberValue(target, propertyName, propertyValue);
 				}
 				catch(Exception ex)
