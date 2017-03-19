@@ -250,11 +250,6 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 查找方法
-		public PluginTreeNode Find(params string[] parts)
-		{
-			return _rootNode.Find(parts);
-		}
-
 		/// <summary>
 		/// 查找指定路径的插件树节点。
 		/// </summary>
@@ -263,40 +258,12 @@ namespace Zongsoft.Plugins
 		/// <exception cref="System.ArgumentNullException">当<paramref name="path"/>参数为空或全空格字符串。</exception>
 		public PluginTreeNode Find(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
-				return null;
+			return _rootNode.Find(path);
+		}
 
-			return _rootNode.Find(path.Split('/'));
-
-			//剔除路劲参数的前后空白字符
-			path = path.Trim();
-
-			int current = -1;
-			int last = path.IndexOf('/');
-			PluginTreeNode node = _rootNode;
-
-			do
-			{
-				int start = last < 0 ? 0 : last + 1;
-				current = path.IndexOf('/', start);
-				int length = current < 0 ? path.Length - start : current - start;
-				string part = path.Substring(start, length);
-
-				if(string.IsNullOrEmpty(part))
-					return node;
-				else
-				{
-					node = node.Children[part];
-
-					if(node == null)
-						return null;
-				}
-
-				if(current < path.Length - 1)
-					last = current;
-			} while(current > 0);
-
-			return node;
+		public PluginTreeNode Find(params string[] paths)
+		{
+			return _rootNode.Find(paths);
 		}
 		#endregion
 

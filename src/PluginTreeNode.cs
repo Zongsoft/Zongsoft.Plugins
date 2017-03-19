@@ -248,57 +248,59 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 公共方法
-		/// <summary>
-		/// 查找相对于当前节点的路径的插件树节点。
-		/// </summary>
-		/// <param name="path">指定的相对路径。</param>
-		/// <returns>如果查找成功则返回对应的插件树节点对象，否则返回空(null)。</returns>
-		/// <remarks>
-		///		<para><paramref name="path"/>参数支持以(.)或(..)打头的相对路径以及以斜杠“/”打头的绝对路径。</para>
-		/// </remarks>
 		public PluginTreeNode Find(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
-				return null;
-
-			if(path.StartsWith("/"))
-				return this.Tree.Find(path);
-
-			var parts = path.Split('/');
-
-			switch(parts[0].Trim())
-			{
-				case ".":
-					if(parts.Length == 1)
-						return this;
-					else
-						return this.Find(parts.Skip(1).ToArray());
-				case "..":
-					if(parts.Length == 1)
-						return this.Parent;
-					else
-						return this.Parent == null ? null : this.Parent.Find(parts.Skip(1).ToArray());
-				default:
-					return this.Find(parts);
-			}
+			return this.Find(new string[] { path });
 		}
 
-		public PluginTreeNode Find(params string[] parts)
+		public PluginTreeNode Find(params string[] paths)
 		{
-			if(parts == null || parts.Length == 0)
+			if(paths == null || paths.Length == 0)
 				return null;
 
 			var node = this;
 
-			foreach(var part in parts)
+			foreach(var path in paths)
 			{
-				if(string.IsNullOrWhiteSpace(part) || part == ".")
+				var start = -1;
+				var part = string.Empty;
+
+				//如果路径为空则忽略
+				if(string.IsNullOrWhiteSpace(path))
 					continue;
 
-				node = node._children[part];
+				do
+				{
+					var index = path.IndexOf('/', start + 1);
 
-				if(node == null)
-					return null;
+					if(index == 0)
+						part = string.Empty;
+					else if(index < 0)
+						part = start < 0 ? path : path.Substring(start + 1);
+					else if(index > 0)
+						part = path.Substring(start + 1, index - (start + 1)); //注意：(start+1) 这个小括号不能去掉
+
+					start = index;
+
+					switch(part)
+					{
+						case "":
+							node = _tree.RootNode;
+							break;
+						case ".":
+							break;
+						case "..":
+							node = _parent ?? _tree.RootNode;
+							break;
+						default:
+							node = node._children[part];
+							break;
+					}
+
+					//如果查找失败则返回
+					if(node == null)
+						return null;
+				} while(start >= 0);
 			}
 
 			return node;
@@ -327,24 +329,15 @@ namespace Zongsoft.Plugins
 			return this.UnwrapValue(ObtainMode.Auto, null, null);
 		}
 
-		public object UnwrapValue(object parameter)
-		{
-			return this.UnwrapValue(ObtainMode.Auto, parameter, null);
-		}
-
 		/// <summary>
-		/// 打开当前节点值，以获取目标对象。
+		/// 解构当前节点值，以获取目标对象。
 		/// </summary>
 		/// <param name="obtainMode">构件值的获取方式。</param>
 		/// <param name="parameter">自定义的参数对象。</param>
+		/// <param name="build">指定的自定义构建方法。</param>
 		/// <returns>返回的目标对象或节点值。</returns>
 		/// <remarks>只有当节点类型<see cref="NodeType"/>为构件(<seealso cref="Zongsoft.Plugins.PluginTreeNodeType.Builtin"/>)，返回其对应的Builtin的目标值。如果是<see cref="Zongsoft.Plugins.PluginTreeNodeType.Custom"/>类型则返回节点值本身；如果是空节点类型则返回空(null)。</remarks>
-		public object UnwrapValue(ObtainMode obtainMode, object parameter)
-		{
-			return this.UnwrapValue(obtainMode, parameter, null);
-		}
-
-		public object UnwrapValue(ObtainMode obtainMode, object parameter, Action<Builders.BuilderContext> build)
+		public object UnwrapValue(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
 		{
 			if(_nodeType == PluginTreeNodeType.Builtin)
 				return ((Builtin)_value).GetValue(obtainMode, parameter, build);
