@@ -172,7 +172,7 @@ namespace Zongsoft.Plugins
 			var node = origin.Find(expression.Path);
 
 			if(node == null)
-				throw new PluginException($"Not found node in the plugin tree for '{pathText}' path.");
+				throw new PluginException($"Not found the PluginTreeNode with '{expression.Path}' path.");
 
 			try
 			{

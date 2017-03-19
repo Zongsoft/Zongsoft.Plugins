@@ -139,7 +139,7 @@ namespace Zongsoft.Plugins
 			if(string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
 
-			int index = this.IndexOf(name);
+			int index = this.IndexOf(name.Trim());
 
 			if(index < 0)
 				return null;
