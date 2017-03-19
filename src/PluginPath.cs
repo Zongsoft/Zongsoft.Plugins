@@ -129,29 +129,9 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 静态方法
-		[Obsolete("Please use Zongsoft.IO.Path.Combine(...) method.")]
-		public static string Combine(params string[] parts)
+		public static string Combine(params string[] paths)
 		{
-			return Zongsoft.IO.Path.Combine(parts);
-
-			//if(parts == null || parts.Length < 1)
-			//	return string.Empty;
-
-			//StringBuilder text = new StringBuilder();
-			//string temp;
-
-			//foreach(string part in parts)
-			//{
-			//	if(string.IsNullOrWhiteSpace(part))
-			//		continue;
-
-			//	temp = part.Trim('/', ' ', '\t');
-
-			//	if(temp.Length > 0)
-			//		text.Append('/' + temp);
-			//}
-
-			//return text.ToString();
+			return Zongsoft.IO.Path.Combine(paths);
 		}
 
 		public static PluginPath Parse(string text)

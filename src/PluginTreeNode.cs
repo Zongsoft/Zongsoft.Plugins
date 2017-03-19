@@ -415,12 +415,14 @@ namespace Zongsoft.Plugins
 				this.Plugin = null;
 
 				var properties = _properties;
+
 				if(properties != null && properties.Count > 0)
 				{
 					foreach(PluginExtendedProperty property in properties)
 					{
-						var propertyType = Reflection.MemberAccess.GetMemberType(_value, property.Name);
-						Reflection.MemberAccess.SetMemberValue(_value, property.Name, property.GetValue(propertyType));
+						Type propertyType;
+						Reflection.MemberAccess.TryGetMemberType(_value, property.Name, out propertyType);
+						Reflection.MemberAccess.TrySetMemberValue(_value, property.Name, property.GetValue(propertyType));
 					}
 				}
 			}

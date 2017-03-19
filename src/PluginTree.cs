@@ -416,23 +416,28 @@ namespace Zongsoft.Plugins
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
 
-			//查找要挂载的路径对应的节点，如果路径查找失败则获取到的是空(null)
-			PluginTreeNode node = this.Find(path);
+			//确认要挂载的路径对应的节点
+			PluginTreeNode node = this.EnsurePath(path, position);
 
-			//如果指定挂载路径的节点是已经构建完成的构件则本次挂载操作失败，并返回假(false)
-			if(node != null && node.NodeType == PluginTreeNodeType.Builtin && ((Builtin)node.Value).IsBuilded)
+			return this.Mount(node, value);
+		}
+
+		public bool Mount(PluginTreeNode node, object value)
+		{
+			if(node == null)
+				throw new ArgumentNullException(nameof(node));
+
+			if(value is Builtin || value is PluginElement || value is PluginTree || value is PluginContext)
 				return false;
 
 			//激发“Mounting”事件
-			this.OnMounting(new PluginMountEventArgs(path, value));
+			this.OnMounting(new PluginMountEventArgs(node.FullPath, value));
 
-			if(node == null)
-				this.MountItem(path, value, position);
-			else
-				node.Value = value;
+			//更新节点值
+			node.Value = value;
 
 			//激发“Mounted”事件
-			this.OnMounted(new PluginMountEventArgs(path, value));
+			this.OnMounted(new PluginMountEventArgs(node.FullPath, value));
 
 			return true;
 		}
