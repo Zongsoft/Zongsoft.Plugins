@@ -267,18 +267,16 @@ namespace Zongsoft.Plugins
 				{
 					Type propertyType;
 
-					//如果构件中当前属性名在目标对象中不存在则忽略
+					//如果构件中当前属性名在目标对象中不存在则记录告警日志
+					//注意：对于不存在的集合成员的获取类型可能会失败，但是下面的设置操作可能会成功，因此这里不能直接返回。
 					if(!Reflection.MemberAccess.TryGetMemberType(target, propertyName, out propertyType))
-					{
 						Zongsoft.Diagnostics.Logger.Warn($"The '{propertyName}' property of '{builtin}' builtin is not existed on '{target.GetType().FullName}' target.");
-						continue;
-					}
 
 					//获取构件中当前属性的值
 					var propertyValue = builtin.Properties.GetValue(propertyName, propertyType, null);
 
 					//将构件中当前属性值更新目标对象的对应属性中
-					Reflection.MemberAccess.SetMemberValue(target, propertyName, propertyValue);
+					Reflection.MemberAccess.TrySetMemberValue(target, propertyName, propertyValue);
 				}
 				catch(Exception ex)
 				{
