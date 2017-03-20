@@ -46,6 +46,18 @@ namespace Zongsoft.Options.Plugins
 				   Path.GetFileNameWithoutExtension(plugin.FilePath) + (extensionName[0] == '.' ? extensionName : "." + extensionName));
 		}
 
+		public static bool HasConfigurationFile(Zongsoft.Plugins.Plugin plugin)
+		{
+			try
+			{
+				return File.Exists(GetConfigurationFilePath(plugin));
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
 		public static string GetConfigurationFilePath(Zongsoft.Plugins.Plugin plugin)
 		{
 			return GetAssistedFilePath(plugin, ".option");
@@ -66,19 +78,6 @@ namespace Zongsoft.Options.Plugins
 
 			string filePath = GetAssistedFilePath(plugin, ".option");
 			return OptionConfigurationManager.Open(filePath);
-
-			//OptionConfiguration configuration = OptionConfigurationManager.Open(filePath, true);
-
-			//var section = configuration.GetSection("/") ?? configuration.Sections.Add("/");
-			//var settings = section["settings"] as SettingElementCollection;
-
-			//if(settings == null)
-			//{
-			//	settings = new SettingElementCollection();
-			//	section.Children.Add("settings", settings);
-			//}
-
-			//return configuration;
 		}
 	}
 }

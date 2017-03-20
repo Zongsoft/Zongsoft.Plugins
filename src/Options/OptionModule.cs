@@ -66,8 +66,11 @@ namespace Zongsoft.Options.Plugins
 		#region 事件处理
 		private void Loader_PluginLoaded(object sender, PluginLoadedEventArgs e)
 		{
-			var proxy = new ConfigurationProxy(() => OptionUtility.GetConfiguration(e.Plugin));
-			e.Plugin.Context.ApplicationContext.OptionManager.Providers.Add(proxy);
+			if(OptionUtility.HasConfigurationFile(e.Plugin))
+			{
+				var proxy = new ConfigurationProxy(() => OptionUtility.GetConfiguration(e.Plugin));
+				e.Plugin.Context.ApplicationContext.OptionManager.Providers.Add(proxy);
+			}
 		}
 
 		private void Loader_PluginUnloaded(object sender, PluginUnloadedEventArgs e)
