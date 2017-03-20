@@ -324,11 +324,6 @@ namespace Zongsoft.Plugins
 			return _value;
 		}
 
-		public object UnwrapValue()
-		{
-			return this.UnwrapValue(ObtainMode.Auto, null, null);
-		}
-
 		/// <summary>
 		/// 解构当前节点值，以获取目标对象。
 		/// </summary>
@@ -345,22 +340,7 @@ namespace Zongsoft.Plugins
 			return _value;
 		}
 
-		public T UnwrapValue<T>()
-		{
-			return this.UnwrapValue<T>(ObtainMode.Auto, null, null);
-		}
-
-		public T UnwrapValue<T>(object parameter)
-		{
-			return this.UnwrapValue<T>(ObtainMode.Auto, parameter, null);
-		}
-
-		public T UnwrapValue<T>(ObtainMode obtainMode, object parameter)
-		{
-			return this.UnwrapValue<T>(obtainMode, parameter, null);
-		}
-
-		public T UnwrapValue<T>(ObtainMode obtainMode, object parameter, Action<Builders.BuilderContext> build)
+		public T UnwrapValue<T>(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
 		{
 			return Zongsoft.Common.Convert.ConvertValue<T>(this.UnwrapValue(obtainMode, parameter, build));
 		}
