@@ -26,8 +26,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.Concurrent;
 
 namespace Zongsoft.Plugins.Builders
 {
@@ -43,14 +42,14 @@ namespace Zongsoft.Plugins.Builders
 
 		#region 私有变量
 		private readonly object _syncRoot;
-		private readonly Stack<BuildToken> _stack;
+		private readonly ConcurrentStack<BuildToken> _stack;
 		#endregion
 
 		#region 私有构造
 		private BuilderManager()
 		{
 			_syncRoot = new object();
-			_stack = new Stack<BuildToken>();
+			_stack = new ConcurrentStack<BuildToken>();
 		}
 		#endregion
 
@@ -105,42 +104,41 @@ namespace Zongsoft.Plugins.Builders
 			if(this.TryGetBuilding(context.Builtin, out value))
 				return value;
 
-			if(build != null)
-				build(context);
-			else
+			try
 			{
-				var target = builder.Build(context);
+				//将创建成功的目标对象保存到当前调用栈中，以便在子构件的构建过程中进行循环创建调用作检测之用
+				//注意：将当前创建的目标对象保存到调用栈中的操作必须在构建子构件集合之前完成！
+				_stack.Push(new BuildToken(context.Builtin, context.Result));
 
-				//如果创建器以两种方式传递过来的目标对象均不为空并且引用不相等，则抛出异常，以确保实现者返回的目标对象是明确唯一的。
-				if(target != null && context.Result != null && object.ReferenceEquals(target, context.Result) == false)
-					throw new PluginException(string.Format("The builder of '{0}' builtin was faild.", context.Builtin.ToString()));
+				if(build != null)
+					build(context);
+				else
+				{
+					var target = builder.Build(context);
 
-				context.Result = context.Result ?? target;
+					//如果创建器以两种方式传递过来的目标对象均不为空并且引用不相等，则抛出异常，以确保实现者返回的目标对象是明确唯一的。
+					if(target != null && context.Result != null && object.Equals(target, context.Result) == false)
+						throw new PluginException(string.Format("The builder of '{0}' builtin was faild.", context.Builtin.ToString()));
+
+					context.Result = context.Result ?? target;
+				}
+
+				//如果要保存构建的目标对象，则将其保存在当前构件对象的Value属性内
+				context.Builtin.Value = context.Value ?? context.Result;
+
+				//如果构建结果不为空并且不取消后续构建操作的话，则继续构建子集
+				if(context.Result != null && !context.Cancel)
+				{
+					BuildChildren(context.Node, context.Parameter, context.Result, context.Node);
+				}
+
+				//设置当前构件为构建已完成标志
+				context.Builtin.IsBuilded = (context.Result != null);
 			}
-
-			//如果要保存构建的目标对象，则将其保存在当前构件对象的Value属性内
-			context.Builtin.Value = context.Value ?? context.Result;
-
-			if(context.Result != null)
+			finally
 			{
-				try
-				{
-					//将创建成功的目标对象保存到当前调用栈中，以便在子构件的构建过程中进行循环创建调用作检测之用
-					//注意：将当前创建的目标对象保存到调用栈中的操作必须在构建子构件集合之前完成！
-					_stack.Push(new BuildToken(context.Builtin, context.Result));
-
-					//如果构建器不取消后续构建操作的话，则继续构建子集
-					if(!context.Cancel)
-						BuildChildren(context.Node, context.Parameter, context.Result, context.Node);
-
-					//设置当前构件为构建已完成标志
-					context.Builtin.IsBuilded = (context.Result != null);
-				}
-				finally
-				{
-					if(_stack.Count > 0)
-						_stack.Pop();
-				}
+				BuildToken token;
+				_stack.TryPop(out token);
 			}
 
 			//通知构建器本次构建工作已完成
@@ -209,14 +207,41 @@ namespace Zongsoft.Plugins.Builders
 		#region 嵌套子类
 		private class BuildToken
 		{
+			#region 公共字段
 			internal Builtin Builtin;
 			internal object Target;
+			#endregion
 
+			#region 构造函数
 			internal BuildToken(Builtin builtin, object target)
 			{
+				if(builtin == null)
+					throw new ArgumentNullException(nameof(builtin));
+
 				this.Builtin = builtin;
 				this.Target = target;
 			}
+			#endregion
+
+			#region 重写方法
+			public override bool Equals(object obj)
+			{
+				if(obj == null || obj.GetType() != typeof(BuildToken))
+					return false;
+
+				return object.Equals(this.Builtin, ((BuildToken)obj).Builtin);
+			}
+
+			public override int GetHashCode()
+			{
+				return this.Builtin.GetHashCode();
+			}
+
+			public override string ToString()
+			{
+				return this.Builtin.ToString();
+			}
+			#endregion
 		}
 		#endregion
 	}
