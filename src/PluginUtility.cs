@@ -650,19 +650,20 @@ namespace Zongsoft.Plugins
 			if(target == null || builtin == null)
 				return;
 
-			//获取当前构件所属的服务容器
-			var serviceProvider = FindServiceProvider(builtin);
-
-			if(serviceProvider == null)
-				return;
-
 			//查找指定目标对象需要注入的属性和字段集(支持对非公共成员的注入)
 			var members = target.GetType().FindMembers(MemberTypes.Field | MemberTypes.Property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, (m, t) => m.GetCustomAttribute((Type)t, true) != null, typeof(Zongsoft.Services.ServiceDependencyAttribute));
 
 			if(members == null || members.Length < 1)
 				return;
 
+			//定义成员值变量
 			object memberValue;
+
+			//获取当前构件所属的服务容器（后备服务容器）
+			var reserveProvider = FindServiceProvider(builtin);
+
+			//定义成员对应的服务容器（默认为后备服务容器）
+			var serviceProvider = reserveProvider;
 
 			foreach(var member in members)
 			{
@@ -672,6 +673,11 @@ namespace Zongsoft.Plugins
 
 				//获取需注入成员的注入标记
 				var attribute = (Zongsoft.Services.ServiceDependencyAttribute)member.GetCustomAttribute(typeof(Zongsoft.Services.ServiceDependencyAttribute), true);
+
+				if(attribute == null || string.IsNullOrWhiteSpace(attribute.Provider))
+					serviceProvider = reserveProvider;
+				else
+					serviceProvider = builtin.Context.ServiceFactory.GetProvider(attribute.Provider) ?? reserveProvider;
 
 				switch(member.MemberType)
 				{
