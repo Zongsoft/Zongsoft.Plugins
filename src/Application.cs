@@ -80,7 +80,9 @@ namespace Zongsoft.Plugins
 			//激发应用上下文对象的“Starting”事件
 			context.RaiseStarting(args);
 
+			#if !DEBUG
 			try
+			#endif
 			{
 				context.PluginContext.PluginTree.Loader.Loaded += delegate
 				{
@@ -132,6 +134,7 @@ namespace Zongsoft.Plugins
 				//激发应用启动完成事件
 				RaiseStarted(args);
 			}
+			#if !DEBUG
 			catch(Exception ex)
 			{
 				//应用无法启动，写入日志
@@ -140,6 +143,7 @@ namespace Zongsoft.Plugins
 				//重抛异常
 				throw;
 			}
+			#endif
 		}
 		#endregion
 

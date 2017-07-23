@@ -77,7 +77,6 @@
     <Compile Include="Parsers\StaticParser.cs" />
     <Compile Include="PluginElementProperty.cs" />
     <Compile Include="PluginElementPropertyCollection.cs" />
-    <Compile Include="Services\Builders\CommandTreeNodeBuilder.cs" />
     <Compile Include="IAppender.cs" />
     <Compile Include="BuiltinTypeConstructor.cs" />
     <Compile Include="Collections\CategoryBuilder.cs" />

@@ -55,37 +55,6 @@ namespace Zongsoft.Plugins.Builders
 			if(property != null && Parsers.Parser.CanParse(property.RawValue))
 				return Parsers.Parser.GetValueType(property.RawValue, builtin);
 
-			//if(property != null && Parsers.Parser.CanParse(property.RawValue))
-			//{
-			//	string scheme, text, prefix, suffix;
-			//	Parsers.Parser.ResolveText(property.RawValue, out scheme, out text, out prefix, out suffix);
-
-			//	var parser = builtin.Plugin.GetParser(scheme);
-
-			//	if(parser != null)
-			//	{
-			//		if(parser is Parsers.PluginPathParser)
-			//		{
-			//			var path = ((Parsers.PluginPathParser)parser).ResolveText(text);
-
-			//			if(!string.IsNullOrWhiteSpace(path))
-			//			{
-			//				var node = builtin.Node.Find(path);
-
-			//				if(node != null)
-			//					return node.ValueType;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			var result = ((IParser)parser).Parse(new Parsers.ParserContext(scheme, text, builtin, null, null));
-
-			//			if(result != null)
-			//				return result.GetType();
-			//		}
-			//	}
-			//}
-
 			return base.GetValueType(builtin);
 		}
 

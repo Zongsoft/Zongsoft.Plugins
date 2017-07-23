@@ -313,7 +313,15 @@ namespace Zongsoft.Plugins
 			string typeName = builtin.Properties.GetValue<string>("type");
 
 			if(string.IsNullOrWhiteSpace(typeName))
-				return null;
+			{
+				//获取所有者元素的类型，如果所有者不是泛型集合则返回空
+				var type = GetOwnerElementType(builtin.Node);
+
+				if(type == null)
+					return null;
+
+				return BuildType(type, builtin);
+			}
 			else
 				return BuildType(typeName, builtin);
 		}
@@ -364,6 +372,11 @@ namespace Zongsoft.Plugins
 			if(type == null)
 				throw new PluginException(string.Format("Can not get type from '{0}' text for '{1}' builtin.", typeName, builtin));
 
+			return BuildType(type, builtin);
+		}
+
+		internal static object BuildType(Type type, Builtin builtin)
+		{
 			try
 			{
 				object result = BuildType(type, (Type parameterType, string parameterName, out object parameterValue) =>
@@ -703,6 +716,38 @@ namespace Zongsoft.Plugins
 						break;
 				}
 			}
+		}
+
+		private static Type GetOwnerElementType(PluginTreeNode node)
+		{
+			var ownerNode = node.Tree.GetOwnerNode(node);
+
+			if(ownerNode == null)
+				return null;
+
+			var ownerType = ownerNode.ValueType;
+
+			if(ownerType == null)
+			{
+				var owner = ownerNode.UnwrapValue(ObtainMode.Never);
+
+				if(owner == null)
+					return null;
+
+				ownerType = owner.GetType();
+			}
+
+			Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), ownerType);
+
+			var types = ownerNode.ValueType.GetInterfaces();
+
+			foreach(var type in types)
+			{
+				if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
+					return type.GetGenericArguments()[0];
+			}
+
+			return null;
 		}
 
 		private static bool CompareBytes(byte[] a, byte[] b)
