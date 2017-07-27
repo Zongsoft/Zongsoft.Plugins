@@ -102,22 +102,45 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 私有方法
-		private bool Append(object container, object item, string key)
+		private bool Append(object container, object child, string key)
 		{
-			if(container == null || item == null)
+			if(container == null || child == null)
 				return false;
 
 			Type containerType = container.GetType();
 
 			if(typeof(IDictionary).IsAssignableFrom(containerType))
 			{
-				((IDictionary)container).Add(key, item);
+				((IDictionary)container).Add(key, child);
 				return true;
 			}
 			else if(typeof(IList).IsAssignableFrom(containerType))
 			{
-				((IList)container).Add(item);
+				var list = (IList)container;
+
+				if(child.GetType() != typeof(string) && child is IEnumerable)
+				{
+					foreach(var entry in (IEnumerable)child)
+					{
+						list.Add(entry);
+					}
+				}
+				else
+				{
+					list.Add(child);
+				}
+
 				return true;
+			}
+
+			var attribute = (System.ComponentModel.DefaultPropertyAttribute)Attribute.GetCustomAttribute(containerType, typeof(System.ComponentModel.DefaultPropertyAttribute), true);
+
+			if(attribute != null)
+			{
+				var property = containerType.GetProperty(attribute.Name);
+
+				if(property != null)
+					this.Append(property.GetValue(container), child, key);
 			}
 
 			var methods = containerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
@@ -130,17 +153,17 @@ namespace Zongsoft.Plugins.Builders
 
 				if(parameters.Length == 2)
 				{
-					if(parameters[0].ParameterType == typeof(string) && parameters[1].ParameterType.IsAssignableFrom(item.GetType()))
+					if(parameters[0].ParameterType == typeof(string) && parameters[1].ParameterType.IsAssignableFrom(child.GetType()))
 					{
-						method.Invoke(container, new object[] { key, item });
+						method.Invoke(container, new object[] { key, child });
 						return true;
 					}
 				}
 				else if(parameters.Length == 1)
 				{
-					if(parameters[0].ParameterType.IsAssignableFrom(item.GetType()))
+					if(parameters[0].ParameterType.IsAssignableFrom(child.GetType()))
 					{
-						method.Invoke(container, new object[] { item });
+						method.Invoke(container, new object[] { child });
 						return true;
 					}
 				}

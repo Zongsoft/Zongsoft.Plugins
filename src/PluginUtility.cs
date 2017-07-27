@@ -737,8 +737,6 @@ namespace Zongsoft.Plugins
 				ownerType = owner.GetType();
 			}
 
-			Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), ownerType);
-
 			var types = ownerNode.ValueType.GetInterfaces();
 
 			foreach(var type in types)
