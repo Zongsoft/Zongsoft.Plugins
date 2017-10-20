@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -25,10 +25,10 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Linq;
 
 namespace Zongsoft.Plugins.Builders
 {
@@ -77,27 +77,7 @@ namespace Zongsoft.Plugins.Builders
 			if(context.Container == null || context.Value == null)
 				return false;
 
-			if(this.Append(context.Container, context.Value, context.Node.Name))
-				return true;
-
-			var names = new string[] { "Children", "Items", "Nodes", "Controls" };
-
-			foreach(string name in names)
-			{
-				//获取插入属性的反射对象
-				var property = context.Container.GetType().GetProperty(name, (BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty));
-
-				if(property != null)
-				{
-					object children = property.GetValue(context.Container, null);
-
-					if(this.Append(children, context.Value, context.Node.Name))
-						return true;
-				}
-			}
-
-			//最后返回失败
-			return false;
+			return this.Append(context.Container, context.Value, context.Node.Name);
 		}
 		#endregion
 
@@ -120,17 +100,20 @@ namespace Zongsoft.Plugins.Builders
 
 				if(child.GetType() != typeof(string) && child is IEnumerable)
 				{
+					var count = 0;
+
 					foreach(var entry in (IEnumerable)child)
 					{
-						list.Add(entry);
+						if(list.Add(entry) >= 0)
+							count++;
 					}
+
+					return count > 0;
 				}
 				else
 				{
-					list.Add(child);
+					return list.Add(child) >= 0;
 				}
-
-				return true;
 			}
 
 			var attribute = (System.ComponentModel.DefaultPropertyAttribute)Attribute.GetCustomAttribute(containerType, typeof(System.ComponentModel.DefaultPropertyAttribute), true);
@@ -139,8 +122,8 @@ namespace Zongsoft.Plugins.Builders
 			{
 				var property = containerType.GetProperty(attribute.Name);
 
-				if(property != null)
-					this.Append(property.GetValue(container), child, key);
+				if(property != null && this.Append(property.GetValue(container), child, key))
+					return true;
 			}
 
 			var methods = containerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
