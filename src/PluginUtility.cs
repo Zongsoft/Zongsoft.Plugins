@@ -737,7 +737,30 @@ namespace Zongsoft.Plugins
 				ownerType = owner.GetType();
 			}
 
-			var types = ownerNode.ValueType.GetInterfaces();
+			var elementType = GetImplementedCollectionElementType(ownerType);
+
+			if(elementType != null)
+				return elementType;
+
+			var attribute = ownerType.GetCustomAttribute<System.ComponentModel.DefaultPropertyAttribute>(true);
+
+			if(attribute != null)
+			{
+				var property = ownerType.GetProperty(attribute.Name, BindingFlags.Public | BindingFlags.Instance);
+
+				if(property != null)
+					return GetImplementedCollectionElementType(property.PropertyType);
+			}
+
+			return null;
+		}
+
+		private static Type GetImplementedCollectionElementType(Type instanceType)
+		{
+			if(instanceType == null)
+				return null;
+
+			var types = instanceType.GetInterfaces();
 
 			foreach(var type in types)
 			{
