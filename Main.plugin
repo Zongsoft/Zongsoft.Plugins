@@ -16,7 +16,6 @@
 		<!-- 基础对象 -->
 		<builder name="link" type="Zongsoft.Plugins.Builders.LinkBuilder, Zongsoft.Plugins"/>
 		<builder name="object" type="Zongsoft.Plugins.Builders.ObjectBuilder, Zongsoft.Plugins"/>
-		<builder name="category" type="Zongsoft.Collections.Plugins.Builders.CategoryBuilder, Zongsoft.Plugins" />
 		<builder name="component" type="Zongsoft.ComponentModel.Plugins.Builders.ComponentBuilder, Zongsoft.Plugins" />
 
 		<!-- 选项配置 -->

@@ -79,7 +79,6 @@
     <Compile Include="PluginElementPropertyCollection.cs" />
     <Compile Include="IAppender.cs" />
     <Compile Include="BuiltinTypeConstructor.cs" />
-    <Compile Include="Collections\CategoryBuilder.cs" />
     <Compile Include="ComponentModel\Builders\ComponentBuilder.cs" />
     <Compile Include="AppenderBehavior.cs" />
     <Compile Include="AppenderContext.cs" />
