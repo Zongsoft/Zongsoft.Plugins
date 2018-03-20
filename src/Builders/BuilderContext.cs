@@ -35,6 +35,8 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 成员字段
+		private IBuilder _builder;
+		private IAppender _appender;
 		private bool _cancel;
 		private Builtin _builtin;
 		private object _parameter;
@@ -45,12 +47,12 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 构造函数
-		private BuilderContext(Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
+		private BuilderContext(IBuilder builder, Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
 		{
-			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+			_builder = builder ?? throw new ArgumentNullException(nameof(builder));
+			_builtin = builtin ?? throw new ArgumentNullException(nameof(builtin));
+			_appender = builder as IAppender;
 
-			_builtin = builtin;
 			_parameter = parameter;
 			_owner = owner;
 			_ownerNode = ownerNode;
@@ -86,6 +88,35 @@ namespace Zongsoft.Plugins.Builders
 			{
 				var pluginContext = this.PluginContext;
 				return pluginContext == null ? null : pluginContext.PluginTree;
+			}
+		}
+
+		/// <summary>
+		/// 获取当前的构建器对象。
+		/// </summary>
+		public IBuilder Builder
+		{
+			get
+			{
+				return _builder;
+			}
+		}
+
+		/// <summary>
+		/// 获取或设置构建过程的追加器。
+		/// </summary>
+		/// <remarks>
+		///		<para>注意：该属性可能会被构建过程设置为空(null)，以阻止后续的追加动作。</para>
+		/// </remarks>
+		public IAppender Appender
+		{
+			get
+			{
+				return _appender;
+			}
+			set
+			{
+				_appender = value;
 			}
 		}
 
@@ -238,17 +269,9 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 创建方法
-		internal static BuilderContext CreateContext(IBuilder builder, Builtin builtin, object parameter)
+		internal static BuilderContext CreateContext(IBuilder builder, Builtin builtin, object parameter, object owner = null, PluginTreeNode ownerNode = null)
 		{
-			return CreateContext(builder, builtin, parameter, null, null);
-		}
-
-		internal static BuilderContext CreateContext(IBuilder builder, Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
-		{
-			if(builder == null)
-				throw new ArgumentNullException("builder");
-
-			return new BuilderContext(builtin, parameter, owner, ownerNode);
+			return new BuilderContext(builder, builtin, parameter, owner, ownerNode);
 		}
 		#endregion
 	}

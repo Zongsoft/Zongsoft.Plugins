@@ -151,8 +151,10 @@ namespace Zongsoft.Plugins.Builders
 			if(context.OwnerNode == null || context.OwnerNode.NodeType != PluginTreeNodeType.Builtin)
 				return;
 
-			var appender = context.OwnerNode.Plugin.GetBuilder(((Builtin)context.OwnerNode.Value).BuilderName) as IAppender;
+			//获取构建上下文所关联的追加器
+			var appender = context.Appender;
 
+			//注意：如果追加器为空表示忽略后续的追加操作
 			if(appender != null)
 				appender.Append(new AppenderContext(context.PluginContext, context.Result, context.Node, context.Owner, context.OwnerNode, AppenderBehavior.Append));
 		}

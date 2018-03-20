@@ -67,23 +67,22 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 公共方法
-		public object Build(Builtin builtin, object parameter, Action<BuilderContext> build)
+		public object Build(Builtin builtin, object parameter, Action<BuilderContext> build, Action<BuilderContext> built)
 		{
 			//获取当前构件的构建器对象
 			IBuilder builder = this.GetBuilder(builtin);
 
 			lock(_syncRoot)
 			{
-				return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter), build);
+				return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter), build, built);
 			}
 		}
 		#endregion
 
 		#region 保护方法
-		protected virtual void OnBuilt(BuilderEventArgs args)
+		protected virtual void OnBuilt(BuilderContext context)
 		{
-			if(this.Built != null)
-				this.Built(this, args);
+			this.Built?.Invoke(this, new BuilderEventArgs(context));
 		}
 		#endregion
 
@@ -93,10 +92,10 @@ namespace Zongsoft.Plugins.Builders
 			//获取当前构件的构建器对象
 			IBuilder builder = this.GetBuilder(builtin);
 
-			return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter, owner, ownerNode), null);
+			return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter, owner, ownerNode), null, null);
 		}
 
-		private object BuildCore(IBuilder builder, BuilderContext context, Action<BuilderContext> build)
+		private object BuildCore(IBuilder builder, BuilderContext context, Action<BuilderContext> build, Action<BuilderContext> built)
 		{
 			object value;
 
@@ -141,11 +140,14 @@ namespace Zongsoft.Plugins.Builders
 				_stack.TryPop(out token);
 			}
 
+			//回调构建完成通知方法
+			built?.Invoke(context);
+
 			//通知构建器本次构建工作已完成
 			builder.OnBuilt(context);
 
 			//激发构建完成事件
-			this.OnBuilt(new BuilderEventArgs(builder, context));
+			this.OnBuilt(context);
 
 			//返回生成的目标对象
 			return context.Result;
