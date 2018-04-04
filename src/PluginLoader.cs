@@ -233,9 +233,12 @@ namespace Zongsoft.Plugins
 			if(_plugins == null || _plugins.Count < 1)
 				return;
 
-			while(_plugins.Count > 0)
+			var plugins = new Plugin[_plugins.Count];
+			_plugins.CopyTo(plugins, 0);
+
+			foreach(var plugin in plugins)
 			{
-				this.Unload(_plugins[0]);
+				this.Unload(plugin);
 			}
 		}
 
@@ -263,7 +266,7 @@ namespace Zongsoft.Plugins
 			foreach(Plugin child in plugin.Children)
 			{
 				this.Unload(child);
-				plugin.Children.Remove(child);
+				plugin.Children.Remove(child.Name);
 			}
 
 			//获取指定插件的直隶从属插件集
@@ -286,7 +289,7 @@ namespace Zongsoft.Plugins
 
 			//将指定卸载的插件从当前根插件列表中删除
 			if(_plugins != null && plugin.Parent == null)
-				_plugins.Remove(plugin);
+				_plugins.Remove(plugin.Name);
 
 			//设置插件状态
 			plugin.Status = PluginStatus.Unloaded;
@@ -472,9 +475,9 @@ namespace Zongsoft.Plugins
 				plugin.StatusDescription = ex.Message;
 
 				if(plugin.Parent == null)
-					_plugins.Remove(plugin);
+					_plugins.Remove(plugin.Name);
 				else
-					plugin.Parent.Children.Remove(plugin);
+					plugin.Parent.Children.Remove(plugin.Name);
 
 				throw new PluginFileException(plugin.FilePath, $"The '{plugin.FilePath}' plugin file resolve failed.", ex);
 			}

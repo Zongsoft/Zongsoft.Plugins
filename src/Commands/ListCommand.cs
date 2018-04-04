@@ -110,9 +110,11 @@ namespace Zongsoft.Plugins.Commands
 
 			if(plugin.Children.Count > 0)
 			{
-				for(int i = 0; i < plugin.Children.Count; i++)
+				var childIndex = 0;
+
+				foreach(var child in plugin.Children)
 				{
-					this.WritePlugin(output, plugin.Children[i], depth + 1, i);
+					this.WritePlugin(output, child, depth + 1, childIndex);
 				}
 
 				output.WriteLine();
