@@ -98,7 +98,7 @@
 			<!-- 将默认命令执行器的根节点暴露出来 -->
 			<object name="Commands" value="{path:../@Root.Children}">
 				<!-- 挂载插件命令集 -->
-				<object name="Plugins">
+				<object name="Plugin">
 					<object name="Find" type="Zongsoft.Plugins.Commands.FindCommand, Zongsoft.Plugins" />
 					<object name="List" type="Zongsoft.Plugins.Commands.ListCommand, Zongsoft.Plugins" />
 					<object name="Tree" type="Zongsoft.Plugins.Commands.TreeCommand, Zongsoft.Plugins" />
