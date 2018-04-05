@@ -26,9 +26,9 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Zongsoft.Plugins.Builders
 {
@@ -120,7 +120,7 @@ namespace Zongsoft.Plugins.Builders
 			var isAdded = false;
 
 			//第二步(a)：确认容器对象实现的各种泛型字典接口
-			Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<,>), containerType, genericType =>
+			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<,>), containerType, genericType =>
 			{
 				var arguments = genericType.GetGenericArguments();
 
@@ -129,21 +129,18 @@ namespace Zongsoft.Plugins.Builders
 					var invoker = Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(arguments), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
 					              Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(arguments), container, "Add", false, false);
 
-					if(invoker != null)
-					{
-						invoker.DynamicInvoke(key, item);
-						return (isAdded = true);
-					}
+					invoker.DynamicInvoke(key, item);
+					return true;
 				}
 
-				return false;
+				return null;
 			});
 
 			if(isAdded)
 				return true;
 
 			//第二步(b)：确认容器对象实现的各种泛型集合接口
-			Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), containerType, genericType =>
+			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), containerType, genericType =>
 			{
 				var arguments = genericType.GetGenericArguments();
 
@@ -157,22 +154,22 @@ namespace Zongsoft.Plugins.Builders
 						if(Common.Convert.TryConvertValue(child, arguments[0], out var item))
 						{
 							invoker.DynamicInvoke(item);
-							isAdded = true;
+							return true;
 						}
 					}
 
-					return isAdded;
+					return null;
 				}
 				else
 				{
 					if(Common.Convert.TryConvertValue(child, arguments[0], out var item))
 					{
 						invoker.DynamicInvoke(item);
-						return (isAdded = true);
+						return true;
 					}
 				}
 
-				return false;
+				return null;
 			});
 
 			if(isAdded)
