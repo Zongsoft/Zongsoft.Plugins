@@ -149,16 +149,21 @@ namespace Zongsoft.Plugins.Builders
 
 				if(child.GetType() != typeof(string) && child is IEnumerable)
 				{
+					int count = 0;
+
 					foreach(var entry in (IEnumerable)child)
 					{
-						if(Common.Convert.TryConvertValue(child, arguments[0], out var item))
+						if(Common.Convert.TryConvertValue(entry, arguments[0], out var item))
 						{
 							invoker.DynamicInvoke(item);
-							return true;
+							count++;
 						}
 					}
 
-					return null;
+					if(count > 0)
+						return true;
+					else
+						return null;
 				}
 				else
 				{
