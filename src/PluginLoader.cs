@@ -497,7 +497,7 @@ namespace Zongsoft.Plugins
 				if(plugin.Status == PluginStatus.Loading)
 				{
 					this.TryPushToStack(plugin, stack);
-					this.LoadPlugin(stack, pluginName => plugins[pluginName], settings);
+					this.LoadPlugin(stack, pluginName => (plugins.TryGet(pluginName, out var found) ? found : null), settings);
 				}
 			}
 
