@@ -88,13 +88,80 @@ namespace Zongsoft.Plugins.Builders
 				return false;
 
 			Type containerType = container.GetType();
+			var isAdded = false;
 
-			//第一步：首先进行非泛型集合判断处理
+			//第一步(a)：确认容器对象实现的各种泛型字典接口
+			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<,>), containerType, genericType =>
+			{
+				var containerElementTypes = genericType.GetGenericArguments();
+
+				if(containerElementTypes[0] == typeof(string) && Common.Convert.TryConvertValue(child, containerElementTypes[1], out var item))
+				{
+					//创建容器集合Add方法委托，因为该方法可能是显式实现也可能不是，但优先采用显式实现版本
+					var add = Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(containerElementTypes), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
+					          Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(containerElementTypes), container, "Add", false, false);
+
+					add.DynamicInvoke(key, item);
+					return true;
+				}
+
+				return null;
+			});
+
+			if(isAdded)
+				return true;
+
+			//第一步(b)：确认容器对象实现的各种泛型集合接口
+			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), containerType, genericType =>
+			{
+				var containerElementTypes = genericType.GetGenericArguments();
+
+				//创建容器集合Add方法委托，因为该方法可能是显式实现也可能不是，但优先采用显式实现版本
+				var add = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(containerElementTypes), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
+				          Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(containerElementTypes), container, "Add", false, false);
+
+				//获取子元素的元素类型（如果子元素不是一个可遍历对象，则返回的元素类型为空）
+				var childElementType = Common.TypeExtension.GetElementType(child.GetType());
+
+				if(childElementType != null && containerElementTypes[0].IsAssignableFrom(childElementType))
+				{
+					int count = 0;
+
+					foreach(var entry in (IEnumerable)child)
+					{
+						if(Common.Convert.TryConvertValue(entry, containerElementTypes[0], out var item))
+						{
+							add.DynamicInvoke(item);
+							count++;
+						}
+					}
+
+					if(count > 0)
+						return true;
+					else
+						return null;
+				}
+				else
+				{
+					if(Common.Convert.TryConvertValue(child, containerElementTypes[0], out var item))
+					{
+						add.DynamicInvoke(item);
+						return true;
+					}
+				}
+
+				return null;
+			});
+
+			if(isAdded)
+				return true;
+
+			//第二步(a)：非泛型字典容器处理
 			if(typeof(IDictionary).IsAssignableFrom(containerType))
 			{
 				((IDictionary)container).Add(key, child);
 				return true;
-			}
+			}//第二步(b)：非泛型集合容器处理
 			else if(typeof(IList).IsAssignableFrom(containerType))
 			{
 				var list = (IList)container;
@@ -116,69 +183,6 @@ namespace Zongsoft.Plugins.Builders
 					return list.Add(child) >= 0;
 				}
 			}
-
-			var isAdded = false;
-
-			//第二步(a)：确认容器对象实现的各种泛型字典接口
-			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<,>), containerType, genericType =>
-			{
-				var arguments = genericType.GetGenericArguments();
-
-				if(arguments[0] == typeof(string) && Common.Convert.TryConvertValue(child, arguments[1], out var item))
-				{
-					var invoker = Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(arguments), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
-					              Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(arguments), container, "Add", false, false);
-
-					invoker.DynamicInvoke(key, item);
-					return true;
-				}
-
-				return null;
-			});
-
-			if(isAdded)
-				return true;
-
-			//第二步(b)：确认容器对象实现的各种泛型集合接口
-			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), containerType, genericType =>
-			{
-				var arguments = genericType.GetGenericArguments();
-
-				var invoker = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(arguments), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
-							  Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(arguments), container, "Add", false, false);
-
-				if(child.GetType() != typeof(string) && child is IEnumerable)
-				{
-					int count = 0;
-
-					foreach(var entry in (IEnumerable)child)
-					{
-						if(Common.Convert.TryConvertValue(entry, arguments[0], out var item))
-						{
-							invoker.DynamicInvoke(item);
-							count++;
-						}
-					}
-
-					if(count > 0)
-						return true;
-					else
-						return null;
-				}
-				else
-				{
-					if(Common.Convert.TryConvertValue(child, arguments[0], out var item))
-					{
-						invoker.DynamicInvoke(item);
-						return true;
-					}
-				}
-
-				return null;
-			});
-
-			if(isAdded)
-				return true;
 
 			//第三步：尝试获取容器对象的默认属性标签
 			var attribute = (System.ComponentModel.DefaultPropertyAttribute)Attribute.GetCustomAttribute(containerType, typeof(System.ComponentModel.DefaultPropertyAttribute), true);
