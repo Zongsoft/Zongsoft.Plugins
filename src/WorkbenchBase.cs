@@ -341,13 +341,8 @@ namespace Zongsoft.Plugins
 
 			object target = node.UnwrapValue(ObtainMode.Auto, this, null);
 
-			if(target is IWorker)
-			{
-				IWorker worker = (IWorker)target;
-
-				if(!worker.Disabled)
-					worker.Start(args);
-			}
+			if(target is IWorker worker && worker.Enabled)
+				worker.Start(args);
 
 			foreach(PluginTreeNode child in node.Children)
 				this.StartWorkers(child, args);
@@ -363,13 +358,8 @@ namespace Zongsoft.Plugins
 
 			object target = node.UnwrapValue(ObtainMode.Never, this, null);
 
-			if(target is IWorker)
-			{
-				IWorker worker = (IWorker)target;
-
-				if(!worker.Disabled)
-					worker.Stop();
-			}
+			if(target is IWorker worker)
+				worker.Stop();
 		}
 		#endregion
 	}
