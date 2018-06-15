@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -39,7 +39,7 @@ namespace Zongsoft.ComponentModel.Plugins.Builders
 	public class ComponentBuilder : Zongsoft.Plugins.Builders.BuilderBase
 	{
 		#region 重写方法
-		protected override void OnBuilt(BuilderContext context)
+		protected override void OnBuildComplete(BuilderContext context)
 		{
 			IContainer container = null;
 			IComponent component = context.Result as IComponent;

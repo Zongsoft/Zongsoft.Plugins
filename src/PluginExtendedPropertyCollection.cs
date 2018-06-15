@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -26,24 +26,19 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace Zongsoft.Plugins
 {
-	public class PluginExtendedPropertyCollection : NameObjectCollectionBase
+	public class PluginExtendedPropertyCollection : Collections.NamedCollectionBase<PluginExtendedProperty>
 	{
 		#region 成员变量
-		private PluginElement _owner;
+		private readonly PluginElement _owner;
 		#endregion
 
 		#region 构造函数
 		public PluginExtendedPropertyCollection(PluginElement owner) : base(StringComparer.OrdinalIgnoreCase)
 		{
-			if(owner == null)
-				throw new ArgumentNullException("owner");
-
-			_owner = owner;
+			_owner = owner ?? throw new ArgumentNullException(nameof(owner));
 		}
 		#endregion
 
@@ -55,50 +50,15 @@ namespace Zongsoft.Plugins
 				return _owner;
 			}
 		}
-
-		public string[] AllKeys
-		{
-			get
-			{
-				return base.BaseGetAllKeys();
-			}
-		}
-
-		/// <summary>
-		/// 获取指定名称的扩展属性对象。
-		/// </summary>
-		/// <param name="name">指定的扩展属性名。</param>
-		/// <returns>返回的<seealso cref="PluginExtendedProperty"/>扩展属性对象，如果指定名称的扩展属性不存在则返回空。</returns>
-		public PluginExtendedProperty this[string name]
-		{
-			get
-			{
-				return (PluginExtendedProperty)base.BaseGet(name);
-			}
-		}
-
-		public PluginExtendedProperty this[int index]
-		{
-			get
-			{
-				return (PluginExtendedProperty)base.BaseGet(index);
-			}
-		}
 		#endregion
 
 		#region 公共方法
-		public bool Contains(string name)
-		{
-			if(string.IsNullOrWhiteSpace(name))
-				return false;
-
-			return base.BaseGet(name) != null;
-		}
-
 		public object GetValue(string name, Type type, object defaultValue)
 		{
-			var item = (PluginExtendedProperty)base.BaseGet(name) ?? this.GetPropertyOfBuiltin(name);
-			return item == null ? defaultValue : item.GetValue(type, defaultValue);
+			if(this.TryGetProperty(name, out var property))
+				return property.GetValue(type, defaultValue);
+
+			return defaultValue;
 		}
 
 		public T GetValue<T>(string name)
@@ -108,38 +68,37 @@ namespace Zongsoft.Plugins
 
 		public T GetValue<T>(string name, T defaultValue)
 		{
-			var item = (PluginExtendedProperty)base.BaseGet(name) ?? this.GetPropertyOfBuiltin(name);
-			return item == null ? defaultValue : (T)item.GetValue(typeof(T), defaultValue);
+			if(this.TryGetProperty(name, out var property))
+				return (T)property.GetValue(typeof(T), defaultValue);
+
+			return defaultValue;
 		}
 
 		public string GetRawValue(string name)
 		{
-			var item = (PluginExtendedProperty)base.BaseGet(name) ?? this.GetPropertyOfBuiltin(name);
-			return item == null ? null : item.RawValue;
+			if(this.TryGetProperty(name, out var property))
+				return property.RawValue;
+
+			return null;
 		}
 
 		public bool TryGetValue(string name, out object value)
 		{
+			if(this.TryGetProperty(name, out var property))
+			{
+				value = property.Value;
+				return true;
+			}
+
 			value = null;
-			var item = (PluginExtendedProperty)base.BaseGet(name) ?? this.GetPropertyOfBuiltin(name);
-
-			if(item == null)
-				return false;
-
-			value = item.Value;
-			return true;
+			return false;
 		}
+		#endregion
 
-		public bool TryGetValue<T>(string name, out T value)
+		#region 重写方法
+		protected override string GetKeyForItem(PluginExtendedProperty item)
 		{
-			value = default(T);
-			var item = (PluginExtendedProperty)base.BaseGet(name) ?? this.GetPropertyOfBuiltin(name);
-
-			if(item == null)
-				return false;
-
-			value = (T)item.GetValue(typeof(T));
-			return true;
+			return item.Name;
 		}
 		#endregion
 
@@ -157,30 +116,26 @@ namespace Zongsoft.Plugins
 			else
 				throw new ArgumentException("Invalid value argument.");
 
-			this.BaseSet(name, property);
+			this.SetItem(name, property);
+
 			return property;
 		}
 		#endregion
 
 		#region 私有方法
-		private PluginExtendedProperty GetPropertyOfBuiltin(string name)
+		private bool TryGetProperty(string name, out PluginExtendedProperty property)
 		{
-			var node = _owner as PluginTreeNode;
+			if(this.TryGetItem(name, out property))
+				return true;
 
-			if(node != null && node.NodeType == PluginTreeNodeType.Builtin)
-				return ((Builtin)node.Value).Properties[name];
+			if(_owner is PluginTreeNode node && node.NodeType == PluginTreeNodeType.Builtin)
+			{
+				if(((Builtin)node.Value).Properties.TryGet(name, out property))
+					return true;
+			}
 
-			return null;
-		}
-		#endregion
-
-		#region 遍历方法
-		public override IEnumerator GetEnumerator()
-		{
-			var values = base.BaseGetAllValues();
-
-			for(int i = 0; i < values.Length; i++)
-				yield return values[i];
+			property = null;
+			return false;
 		}
 		#endregion
 	}

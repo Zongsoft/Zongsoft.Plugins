@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -359,14 +359,11 @@ namespace Zongsoft.Plugins
 			//已经成功加载的主插件列表
 			var masters = new List<Plugin>();
 
-			//注意：取消了对返回的文件名数组进行排序(包含文件扩展名的排序是不准的)
-			//Array.Sort<string>(filePaths, StringComparer.Ordinal);
-
 			//依次加载所有插件文件
 			foreach(string filePath in filePaths)
 			{
 				//首先加载插件文件的清单信息(根据清单信息中的依赖插件来决定是否需要完整加载)
-				Plugin plugin = this.LoadPluginManifest(filePath, parent, settings);
+				var plugin = this.LoadPluginManifest(filePath, parent, settings);
 
 				//如果预加载失败，则跳过以进行下一个插件文件的处理
 				if(plugin == null || plugin.Status == PluginStatus.Failed)
@@ -488,16 +485,25 @@ namespace Zongsoft.Plugins
 			if(plugins == null || plugins.Count < 1)
 				return;
 
+			Plugin hidden = null;
 			var stack = new Stack<Plugin>();
 
-			//注意：①. 先加载同级插件
+			//注意：①. 先加载同级插件（忽略隐藏式插件）
 			foreach(var plugin in plugins)
 			{
 				//确保同级插件栈内的所有插件一定都是未加载的插件
 				if(plugin.Status == PluginStatus.Loading)
 				{
-					this.TryPushToStack(plugin, stack);
-					this.LoadPlugin(stack, pluginName => (plugins.TryGet(pluginName, out var found) ? found : null), settings);
+					//如果是隐藏式插件，则先忽略它，放待最后再来加载
+					if(plugin.IsHidden)
+					{
+						hidden = plugin;
+					}
+					else
+					{
+						this.TryPushToStack(plugin, stack);
+						this.LoadPlugin(stack, pluginName => (plugins.TryGet(pluginName, out var found) ? found : null), settings);
+					}
 				}
 			}
 
@@ -506,6 +512,13 @@ namespace Zongsoft.Plugins
 			{
 				if(plugin.Status == PluginStatus.Loaded)
 					this.LoadPlugins(plugin.Children, settings);
+			}
+
+			//注意：③. 如果当前层级中含有隐藏式插件，则留待最后再来加载它
+			if(hidden != null)
+			{
+				this.TryPushToStack(hidden, stack);
+				this.LoadPlugin(stack, pluginName => (plugins.TryGet(pluginName, out var found) ? found : null), settings);
 			}
 		}
 

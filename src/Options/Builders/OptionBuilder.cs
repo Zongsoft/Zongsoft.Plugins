@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -75,7 +75,7 @@ namespace Zongsoft.Options.Plugins.Builders
 			return node;
 		}
 
-		protected override void OnBuilt(BuilderContext context)
+		protected override void OnBuildComplete(BuilderContext context)
 		{
 			var childNode = context.Result as OptionNode;
 

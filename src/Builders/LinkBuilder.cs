@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2016 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -39,9 +39,7 @@ namespace Zongsoft.Plugins.Builders
 	{
 		public override Type GetValueType(Builtin builtin)
 		{
-			var property = builtin.Properties["ref"];
-
-			if(property == null)
+			if(!builtin.Properties.TryGet("ref", out var property))
 				throw new PluginException(string.Format("Missing 'ref' property in '{0}' builtin.", builtin));
 
 			var refNode = builtin.Node.Find(property.RawValue);
@@ -50,9 +48,7 @@ namespace Zongsoft.Plugins.Builders
 
 		public override object Build(BuilderContext context)
 		{
-			var property = context.Builtin.Properties["ref"];
-
-			if(property == null)
+			if(!context.Builtin.Properties.TryGet("ref", out var property))
 				throw new PluginException(string.Format("Missing 'ref' property in '{0}' builtin.", context.Builtin));
 
 			//阻止构建下级节点

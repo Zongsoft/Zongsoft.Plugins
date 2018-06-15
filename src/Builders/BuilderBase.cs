@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2016 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -146,7 +146,7 @@ namespace Zongsoft.Plugins.Builders
 			}
 		}
 
-		protected virtual void OnBuilt(BuilderContext context)
+		protected virtual void OnBuildComplete(BuilderContext context)
 		{
 			if(context.OwnerNode == null || context.OwnerNode.NodeType != PluginTreeNodeType.Builtin)
 				return;
@@ -165,10 +165,10 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 显式实现
-		void IBuilder.OnBuilt(BuilderContext context)
+		void IBuilder.OnBuildComplete(BuilderContext context)
 		{
 			this.ApplyBehaviors(context);
-			this.OnBuilt(context);
+			this.OnBuildComplete(context);
 		}
 		#endregion
 	}

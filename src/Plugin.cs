@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -43,6 +43,7 @@ namespace Zongsoft.Plugins
 		private PluginTree _pluginTree;
 		private string _name;
 		private string _filePath;
+		private bool _isHidden;
 		private PluginStatus _status;
 		private string _statusDescription;
 		private PluginManifest _manifest;
@@ -79,6 +80,7 @@ namespace Zongsoft.Plugins
 			_name = name.Trim();
 			_filePath = filePath;
 			_parent = parent;
+			_isHidden = string.Equals(Path.GetFileName(filePath), ".plugin", StringComparison.OrdinalIgnoreCase);
 			_status = PluginStatus.None;
 			_manifest = new PluginManifest(this);
 			_children = new PluginCollection(this);
@@ -136,13 +138,28 @@ namespace Zongsoft.Plugins
 		}
 
 		/// <summary>
+		/// 获取当前插件是否为隐藏式插件文件。
+		/// </summary>
+		/// <remarks>
+		///		<para>注意：隐藏式插件不可成为主插件，即对应的<see cref="IsMaster"/>属性始终为假(False)。</para>
+		///		<para>注意：隐藏式插件文件中不能定义依赖项。</para>
+		/// </remarks>
+		public bool IsHidden
+		{
+			get
+			{
+				return _isHidden;
+			}
+		}
+
+		/// <summary>
 		/// 获取当前插件是否为主插件，即没有依赖项的插件。
 		/// </summary>
 		public bool IsMaster
 		{
 			get
 			{
-				return (this.Manifest.Dependencies == null || this.Manifest.Dependencies.Count < 1);
+				return (!_isHidden) && (this.Manifest.Dependencies == null || this.Manifest.Dependencies.Count < 1);
 			}
 		}
 
@@ -153,7 +170,7 @@ namespace Zongsoft.Plugins
 		{
 			get
 			{
-				return (this.Manifest.Dependencies != null && this.Manifest.Dependencies.Count > 0);
+				return _isHidden || (this.Manifest.Dependencies != null && this.Manifest.Dependencies.Count > 0);
 			}
 		}
 

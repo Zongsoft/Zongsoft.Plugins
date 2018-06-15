@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -257,7 +257,7 @@ namespace Zongsoft.Plugins
 			if(target == null || builtin == null)
 				return;
 
-			foreach(string propertyName in builtin.Properties.AllKeys)
+			foreach(string propertyName in builtin.Properties.Keys)
 			{
 				//如果当前属性名为忽略属性则忽略设置
 				if(ignoredProperties != null && ignoredProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
@@ -294,7 +294,7 @@ namespace Zongsoft.Plugins
 					message.AppendFormat("\tOccurred an error on set '{1}' property of '{0}' builtin, it's raw value is \"{2}\", The target type of builtin is '{3}'.",
 											builtin.ToString(),
 											propertyName,
-											builtin.Properties[propertyName].RawValue,
+											builtin.Properties.GetRawValue(propertyName),
 											target.GetType().AssemblyQualifiedName);
 
 					throw new PluginException(message.ToString(), ex);

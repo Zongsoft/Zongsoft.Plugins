@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -25,68 +25,32 @@
  */
 
 using System;
-using System.Collections.ObjectModel;
 
 namespace Zongsoft.Plugins
 {
-	public class PluginElementPropertyCollection : KeyedCollection<string, PluginElementProperty>
+	public class PluginElementPropertyCollection : Collections.NamedCollectionBase<PluginElementProperty>
 	{
 		#region 成员字段
-		private PluginElement _owner;
+		private readonly PluginElement _owner;
 		#endregion
 
 		#region 构造函数
 		public PluginElementPropertyCollection(PluginElement owner) : base(StringComparer.OrdinalIgnoreCase)
 		{
-			if(owner == null)
-				throw new ArgumentNullException(nameof(owner));
-
-			_owner = owner;
+			_owner = owner ?? throw new ArgumentNullException(nameof(owner));
 		}
 		#endregion
 
 		#region 公共方法
-		public bool TryGet(string name, out PluginElementProperty value)
-		{
-			value = null;
-
-			var dictionary = this.Dictionary;
-
-			if(dictionary != null)
-				return dictionary.TryGetValue(name, out value);
-
-			foreach(var item in Items)
-			{
-				if(this.Comparer.Equals(GetKeyForItem(item), name))
-				{
-					value = item;
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		public bool Set(string name, string rawValue)
+		public void Set(string name, string rawValue)
 		{
 			if(string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException(nameof(name));
 
-			var dictionary = this.Dictionary;
-
-			if(dictionary != null)
-			{
-				PluginElementProperty property;
-
-				if(dictionary.TryGetValue(name, out property))
-				{
-					property.RawValue = rawValue;
-					return true;
-				}
-			}
-
-			this.Add(new PluginElementProperty(_owner, name, rawValue));
-			return false;
+			if(this.TryGetItem(name, out var property))
+				property.RawValue = rawValue;
+			else
+				this.AddItem(new PluginElementProperty(_owner, name, rawValue));
 		}
 		#endregion
 
@@ -96,7 +60,7 @@ namespace Zongsoft.Plugins
 			return item.Name;
 		}
 
-		protected override void InsertItem(int index, PluginElementProperty item)
+		protected override void AddItem(PluginElementProperty item)
 		{
 			if(item == null)
 				throw new ArgumentNullException(nameof(item));
@@ -105,7 +69,7 @@ namespace Zongsoft.Plugins
 			item.Owner = _owner;
 
 			//调用基类同名方法
-			base.InsertItem(index, item);
+			base.AddItem(item);
 		}
 		#endregion
 	}

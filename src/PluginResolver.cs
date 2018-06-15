@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -264,6 +264,9 @@ namespace Zongsoft.Plugins
 						this.ResolveAssemblies(reader.ReadSubtree(), plugin);
 						break;
 					case "dependencies":
+						if(plugin.IsHidden)
+							throw new PluginFileException($"The dependencies cannot be defined in the '{plugin.FilePath}' hidden plugin file.");
+
 						this.ResolveDependencies(reader.ReadSubtree(), plugin);
 						break;
 					default:

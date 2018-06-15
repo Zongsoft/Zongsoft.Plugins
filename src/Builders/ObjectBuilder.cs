@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -50,9 +50,7 @@ namespace Zongsoft.Plugins.Builders
 			if(builtin == null)
 				return base.GetValueType(builtin);
 
-			var property = builtin.Properties["value"];
-
-			if(property != null && Parsers.Parser.CanParse(property.RawValue))
+			if(builtin.Properties.TryGet("value", out var property) && Parsers.Parser.CanParse(property.RawValue))
 				return Parsers.Parser.GetValueType(property.RawValue, builtin);
 
 			return base.GetValueType(builtin);

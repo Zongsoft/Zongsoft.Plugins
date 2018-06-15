@@ -1,8 +1,8 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -33,7 +33,7 @@ namespace Zongsoft.Plugins.Builders
 	public class BuilderManager
 	{
 		#region 事件定义
-		public event EventHandler<BuilderEventArgs> Built;
+		public event EventHandler<BuilderEventArgs> BuildCompleted;
 		#endregion
 
 		#region 单例变量
@@ -80,9 +80,9 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 保护方法
-		protected virtual void OnBuilt(BuilderContext context)
+		protected virtual void OnBuildCompleted(BuilderContext context)
 		{
-			this.Built?.Invoke(this, new BuilderEventArgs(context));
+			this.BuildCompleted?.Invoke(this, new BuilderEventArgs(context));
 		}
 		#endregion
 
@@ -144,10 +144,10 @@ namespace Zongsoft.Plugins.Builders
 			built?.Invoke(context);
 
 			//通知构建器本次构建工作已完成
-			builder.OnBuilt(context);
+			builder.OnBuildComplete(context);
 
 			//激发构建完成事件
-			this.OnBuilt(context);
+			this.OnBuildCompleted(context);
 
 			//返回生成的目标对象
 			return context.Result;
@@ -163,7 +163,11 @@ namespace Zongsoft.Plugins.Builders
 				switch(child.NodeType)
 				{
 					case PluginTreeNodeType.Builtin:
-						this.Build((Builtin)child.Value, parameter, owner, ownerNode);
+						var builtin = (Builtin)child.Value;
+
+						if(!builtin.IsBuilded)
+							this.Build(builtin, parameter, owner, ownerNode);
+
 						break;
 					case PluginTreeNodeType.Empty:
 						this.BuildChildren(child, parameter, owner, ownerNode);

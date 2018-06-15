@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -56,7 +56,7 @@ namespace Zongsoft.Plugins
 		/// <remarks>
 		///		<para>注意：对于创建器的实现者，请在本方法内实现将目标对象添加到所有者对应的子集中去的逻辑，切勿在<see cref="Build"/>方法中实现添加逻辑，因为构建逻辑可被外部调用者覆盖，因此务必将创建于添加子集的逻辑分别处理。</para>
 		/// </remarks>
-		void OnBuilt(Builders.BuilderContext context);
+		void OnBuildComplete(Builders.BuilderContext context);
 
 		/// <summary>
 		/// 卸载指定构件对应的目标对象。

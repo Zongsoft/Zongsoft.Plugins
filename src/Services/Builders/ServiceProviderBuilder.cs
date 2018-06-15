@@ -1,6 +1,6 @@
 ﻿/*
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -51,14 +51,14 @@ namespace Zongsoft.Services.Plugins.Builders
 			return new PluginServiceProvider(context.PluginContext, providerPath);
 		}
 
-		protected override void OnBuilt(BuilderContext context)
+		protected override void OnBuildComplete(BuilderContext context)
 		{
 			var serviceFactory = context.Owner as ServiceProviderFactory;
 
 			if(serviceFactory != null)
 				serviceFactory.Register(context.Builtin.Name, (IServiceProvider)context.Result);
 			else
-				base.OnBuilt(context);
+				base.OnBuildComplete(context);
 		}
 		#endregion
 	}
