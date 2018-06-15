@@ -36,8 +36,8 @@ namespace Zongsoft.Plugins.Builders
 		public event EventHandler<BuilderEventArgs> BuildCompleted;
 		#endregion
 
-		#region 单例变量
-		private static BuilderManager _current;
+		#region 单例字段
+		public static readonly BuilderManager Current = new BuilderManager();
 		#endregion
 
 		#region 私有变量
@@ -50,19 +50,6 @@ namespace Zongsoft.Plugins.Builders
 		{
 			_syncRoot = new object();
 			_stack = new ConcurrentStack<BuildToken>();
-		}
-		#endregion
-
-		#region 单例属性
-		public static BuilderManager Current
-		{
-			get
-			{
-				if(_current == null)
-					System.Threading.Interlocked.CompareExchange(ref _current, new BuilderManager(), null);
-
-				return _current;
-			}
 		}
 		#endregion
 
