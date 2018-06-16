@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -41,14 +41,11 @@ namespace Zongsoft.Plugins
 		#region 构造函数
 		public BuiltinType(Builtin builtin, string typeName)
 		{
-			if(builtin == null)
-				throw new ArgumentNullException("builtin");
-
 			if(string.IsNullOrWhiteSpace(typeName))
-				throw new ArgumentNullException("typeName");
+				throw new ArgumentNullException(nameof(typeName));
 
 			_type = null;
-			_builtin = builtin;
+			_builtin = builtin ?? throw new ArgumentNullException(nameof(builtin));
 			_typeName = typeName.Trim();
 			_constructor = new BuiltinTypeConstructor(this);
 		}

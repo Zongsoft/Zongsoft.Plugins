@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+
 <plugin name="Main"
         title="Main Plugin"
         author="Popeye Zhong(zongsoft@qq.com)"
@@ -13,17 +14,12 @@
 	</manifest>
 
 	<builders>
-		<!-- 基础对象 -->
-		<builder name="link" type="Zongsoft.Plugins.Builders.LinkBuilder, Zongsoft.Plugins"/>
+		<builder name="lazy" type="Zongsoft.Plugins.Builders.LazyBuilder, Zongsoft.Plugins"/>
 		<builder name="object" type="Zongsoft.Plugins.Builders.ObjectBuilder, Zongsoft.Plugins"/>
 		<builder name="component" type="Zongsoft.ComponentModel.Plugins.Builders.ComponentBuilder, Zongsoft.Plugins" />
 
 		<!-- 选项配置 -->
 		<builder name="option" type="Zongsoft.Options.Plugins.Builders.OptionBuilder, Zongsoft.Plugins" />
-
-		<!-- 服务管理 -->
-		<builder name="provider" type="Zongsoft.Services.Plugins.Builders.ServiceProviderBuilder, Zongsoft.Plugins" />
-		<builder name="serviceProvider" type="Zongsoft.Services.Plugins.Builders.ServiceProviderBuilder, Zongsoft.Plugins" />
 	</builders>
 
 	<parsers>
@@ -38,44 +34,20 @@
 		<parser name="predicate" type="Zongsoft.Services.Plugins.Parsers.PredicateParser, Zongsoft.Plugins" />
 	</parsers>
 
-	<!-- 挂载启动项 -->
-	<extension path="/Workbench/Startup">
-		<!--object name="TcpServer" value="{path:/Workspace/Communication/TcpServer}" /-->
-		<!--object name="FtpServer" value="{path:/Workspace/Communication/FtpServer}" /-->
-	</extension>
-
-	<!-- 声明扩展点 -->
-	<extension path="/Workbench">
-		<!-- 设置文件目录系统的服务容器 -->
-		<object name="FileSystem" type="Zongsoft.Services.Plugins.PluginServiceProvider, Zongsoft.Plugins">
-			<!-- 设置构件行为特性：将当前服务容器赋值给文件系统的静态属性 -->
-			<object.property name="Providers" target="{type:Zongsoft.IO.FileSystem, Zongsoft.CoreLibrary}" value="{path:.}" />
-
-			<!-- 挂载本地文件目录系统 -->
-			<object name="LocalFileSystem" value="{static:Zongsoft.IO.LocalFileSystem.Instance, Zongsoft.CoreLibrary}" />
-		</object>
-
-		<!-- 设置选项扩展点 -->
-		<object name="Options" value="{path:/Workspace/Environment/ApplicationContext.OptionManager.RootNode}">
-			<option name="Environment" title="{res:Text.Environment}" />
-		</object>
-	</extension>
-
-	<!-- 挂载默认服务容器 -->
+	<!-- 设置服务上下文 -->
 	<extension path="/Workspace/Environment">
+		<applicationContext.serviceFactory>{path:/Workspace/Services/Providers}</applicationContext.serviceFactory>
+
 		<applicationContext.serviceFactory.default>
-			<serviceProvider name="Default" path="/Workspace/Services" />
+			<lazy name="Default"
+			      path="/Workspace/Services"
+			      type="Zongsoft.Services.PluginServiceProvider, Zongsoft.Plugins" />
 		</applicationContext.serviceFactory.default>
 	</extension>
 
 	<!-- 挂载服务容器工厂 -->
 	<extension path="/Workspace/Services">
 		<object name="Providers" value="{path:/Workspace/Environment/ApplicationContext.ServiceFactory}" />
-	</extension>
-
-	<!-- 将服务容器工厂路径附加到工作台路径下，以匿名节点的方式驱动服务容器工厂的自动构建动作 -->
-	<extension path="/Workbench">
-		<object value="{path:/Workspace/Services/Providers}" />
 	</extension>
 
 	<!-- 挂载默认服务容器下的各个服务 -->
@@ -89,6 +61,16 @@
 		</object>
 
 		<object name="HasCollection" type="Zongsoft.Collections.Plugins.HasCollectionPredication, Zongsoft.Plugins" />
+	</extension>
+
+	<extension path="/Workbench">
+		<!-- 挂载文件目录系统 -->
+		<object name="FileSystem" value="{static:Zongsoft.IO.FileSystem.Providers, Zongsoft.CoreLibrary}" />
+
+		<!-- 设置选项扩展点 -->
+		<object name="Options" value="{path:/Workspace/Environment/ApplicationContext.OptionManager.RootNode}">
+			<option name="Environment" title="{res:Text.Environment}" />
+		</object>
 	</extension>
 
 	<!-- 挂载命令执行器 -->

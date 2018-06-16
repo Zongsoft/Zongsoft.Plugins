@@ -58,6 +58,7 @@
     <Compile Include="Builders\BuilderContext.cs" />
     <Compile Include="Builders\BuilderEventArgs.cs" />
     <Compile Include="Builders\BuilderManager.cs" />
+    <Compile Include="Builders\LazyBuilder.cs" />
     <Compile Include="Builders\LinkBuilder.cs" />
     <Compile Include="BuiltinBehavior.cs" />
     <Compile Include="BuiltinBehaviorCollection.cs" />
@@ -95,7 +96,6 @@
     <Compile Include="Builders\ObjectBuilder.cs" />
     <Compile Include="PluginExtendedProperty.cs" />
     <Compile Include="PluginExtendedPropertyCollection.cs" />
-    <Compile Include="Services\Builders\ServiceProviderBuilder.cs" />
     <Compile Include="Builtin.cs" />
     <Compile Include="IBuilder.cs" />
     <Compile Include="IParser.cs" />
@@ -159,9 +159,15 @@
     <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\LICENSE">
+      <Link>LICENSE</Link>
+    </None>
     <None Include="..\Main.plugin">
       <Link>Main.plugin</Link>
       <SubType>Designer</SubType>
+    </None>
+    <None Include="..\README.md">
+      <Link>README.md</Link>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2016 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -29,37 +29,36 @@ using System.Collections.Generic;
 
 using Zongsoft.Plugins;
 
-namespace Zongsoft.Services.Plugins
+namespace Zongsoft.Services
 {
-	public class PluginServiceProvider : Zongsoft.Services.ServiceProviderBase
+	public class PluginServiceProvider : ServiceProviderBase
 	{
+		#region 常量定义
+		private const string SERVICES_PATH = "/Workspace/Services";
+		#endregion
+
 		#region 成员变量
-		private PluginContext _context;
 		private string _path;
 		private PluginTreeNode _node;
+		private PluginContext _context;
 		#endregion
 
 		#region 构造函数
-		public PluginServiceProvider(Builtin builtin)
+		public PluginServiceProvider(Builtin builtin) : base(builtin.Name)
 		{
-			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+			var path = builtin.Properties.GetRawValue("path");
+
+			if(string.IsNullOrWhiteSpace(path))
+			{
+				if(string.Equals(builtin.FullPath, SERVICES_PATH, StringComparison.OrdinalIgnoreCase))
+					_path = builtin.FullPath;
+				else
+					_path = PluginPath.Combine(SERVICES_PATH, builtin.Name);
+			}
+			else
+				_path = path == "." ? builtin.FullPath : path;
 
 			_context = builtin.Context;
-			_path = builtin.FullPath;
-			this.Storage = new PluginServiceStorage(this);
-		}
-
-		internal PluginServiceProvider(PluginContext context, string providerPath)
-		{
-			if(context == null)
-				throw new ArgumentNullException("context");
-
-			if(string.IsNullOrWhiteSpace(providerPath))
-				throw new ArgumentNullException("providerPath");
-
-			_context = context;
-			_path = providerPath.Trim();
 			this.Storage = new PluginServiceStorage(this);
 		}
 		#endregion

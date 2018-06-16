@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -27,39 +27,23 @@
 using System;
 using System.Collections.Generic;
 
-using Zongsoft.Plugins;
-using Zongsoft.Plugins.Builders;
-
-namespace Zongsoft.Services.Plugins.Builders
+namespace Zongsoft.Plugins.Builders
 {
-	[BuilderBehavior(typeof(PluginServiceProvider))]
-	public class ServiceProviderBuilder : Zongsoft.Plugins.Builders.BuilderBase
+	/// <summary>
+	/// 对象懒惰式创建器。
+	/// </summary>
+	/// <remarks>
+	///		<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它不始终不会激发对子节点的构建。</para>
+	/// </remarks>
+	public class LazyBuilder : ObjectBuilder
 	{
-		#region 重写方法
 		public override object Build(BuilderContext context)
 		{
-			//阻止对子节点的构建
+			//阻止构建下级节点
 			context.Cancel = true;
 
-			string providerPath = context.Builtin.Properties.GetRawValue("path");
-
-			if(string.IsNullOrWhiteSpace(providerPath))
-				providerPath = "/Workspace/Services/" + context.Builtin.Name;
-			else if(providerPath == ".")
-				providerPath = context.Builtin.FullPath;
-
-			return new PluginServiceProvider(context.PluginContext, providerPath);
+			//调用基类同名方法
+			return base.Build(context);
 		}
-
-		protected override void OnBuildComplete(BuilderContext context)
-		{
-			var serviceFactory = context.Owner as ServiceProviderFactory;
-
-			if(serviceFactory != null)
-				serviceFactory.Register(context.Builtin.Name, (IServiceProvider)context.Result);
-			else
-				base.OnBuildComplete(context);
-		}
-		#endregion
 	}
 }

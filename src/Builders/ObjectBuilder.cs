@@ -35,7 +35,7 @@ namespace Zongsoft.Plugins.Builders
 	public class ObjectBuilder : BuilderBase, IAppender
 	{
 		#region 构造函数
-		public ObjectBuilder() : base(new string[] { "value" })
+		public ObjectBuilder()
 		{
 		}
 
@@ -58,12 +58,21 @@ namespace Zongsoft.Plugins.Builders
 
 		public override object Build(BuilderContext context)
 		{
-			object result = null;
+			//如果定义了类型（或简单的type或完整的constructor）
+			if(context.Builtin.BuiltinType != null)
+				return base.Build(context);
 
-			if(context.Builtin.Properties.TryGetValue("value", out result))
-				PluginUtility.UpdateProperties(result, context.Builtin, this.IgnoredProperties);
-			else
-				result = base.Build(context);
+			//如果定义了value属性，则采用该属性值作为构建结果
+			if(context.Builtin.Properties.TryGetValue("value", out var result) && result != null)
+			{
+				//必须将value自身作为忽略属性项
+				var ignoredProperties = this.IgnoredProperties == null ?
+					new HashSet<string>(new[] { "value" }, StringComparer.OrdinalIgnoreCase) :
+					new HashSet<string>(this.IgnoredProperties.Concat(new[] { "value" }), StringComparer.OrdinalIgnoreCase);
+
+				//更新构件属性到目标对象的属性中
+				PluginUtility.UpdateProperties(result, context.Builtin, ignoredProperties);
+			}
 
 			return result;
 		}

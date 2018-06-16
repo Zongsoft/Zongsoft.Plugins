@@ -35,6 +35,7 @@ namespace Zongsoft.Plugins.Builders
 	/// <remarks>
 	///		<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它不始终不会激发对子节点的构建。</para>
 	/// </remarks>
+	[Obsolete]
 	public class LinkBuilder : ObjectBuilder
 	{
 		public override Type GetValueType(Builtin builtin)

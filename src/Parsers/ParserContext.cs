@@ -33,9 +33,7 @@ namespace Zongsoft.Plugins.Parsers
 		#region 成员变量
 		private string _text;
 		private string _scheme;
-		private Builtin _builtin;
 		private PluginTreeNode _node;
-		private Plugin _plugin;
 		private string _memberName;
 		private Type _memberType;
 		private object _parameter;
@@ -45,41 +43,32 @@ namespace Zongsoft.Plugins.Parsers
 		internal ParserContext(string scheme, string text, PluginTreeNode node, string memberName, Type memberType, object parameter = null)
 		{
 			if(node == null)
-				throw new ArgumentNullException("plugin");
+				throw new ArgumentNullException(nameof(node));
 
-			this.Initialize(scheme, text, null, node, memberName, memberType, parameter);
+			this.Initialize(scheme, text, node, memberName, memberType, parameter);
 		}
 
 		internal ParserContext(string scheme, string text, Builtin builtin, string memberName, Type memberType, object parameter = null)
 		{
 			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+				throw new ArgumentNullException(nameof(builtin));
 
-			this.Initialize(scheme, text, builtin, null, memberName, memberType, parameter);
+			this.Initialize(scheme, text, builtin.Node, memberName, memberType, parameter);
 		}
 		#endregion
 
 		#region 初始化器
-		private void Initialize(string scheme, string text, Builtin builtin, PluginTreeNode node, string memberName, Type memberType, object parameter)
+		private void Initialize(string scheme, string text, PluginTreeNode node, string memberName, Type memberType, object parameter)
 		{
 			if(string.IsNullOrWhiteSpace(scheme))
-				throw new ArgumentNullException("scheme");
-
-			if(builtin == null && node == null)
-				throw new ArgumentException();
+				throw new ArgumentNullException(nameof(scheme));
 
 			_scheme = scheme;
 			_text = text ?? string.Empty;
 			_parameter = parameter;
 			_memberName = memberName;
 			_memberType = memberType;
-			_builtin = builtin;
-			_node = node ?? (builtin == null ? null : builtin.Node);
-
-			if(builtin == null)
-				_plugin = node.Plugin;
-			else
-				_plugin = builtin.Plugin;
+			_node = node ?? throw new ArgumentNullException(nameof(node));
 		}
 		#endregion
 
@@ -146,12 +135,12 @@ namespace Zongsoft.Plugins.Parsers
 		{
 			get
 			{
-				return _builtin;
+				return _node.NodeType == PluginTreeNodeType.Builtin ? (Builtin)_node.Value : null;
 			}
 		}
 
 		/// <summary>
-		/// 获取待解析文本所在的插件树节点(<see cref="PluginTreeNode"/>)，注意：该属性可能返回空值(null)。
+		/// 获取待解析文本所在的插件树节点(<see cref="PluginTreeNode"/>)。
 		/// </summary>
 		public PluginTreeNode Node
 		{
@@ -168,21 +157,18 @@ namespace Zongsoft.Plugins.Parsers
 		{
 			get
 			{
-				return _plugin;
+				return _node.Plugin;
 			}
 		}
 
 		/// <summary>
-		/// 获取插件应用上下文对象，注意：该属性值可能会为空值(null)。
+		/// 获取插件应用上下文对象。
 		/// </summary>
-		/// <remarks>
-		///		<para>如果当前解析器上下文关联到一个空节点或者自定义节点，则该属性返回空。</para>
-		/// </remarks>
 		public PluginContext PluginContext
 		{
 			get
 			{
-				return _plugin == null ? null : _plugin.Context;
+				return _node.Tree.Context;
 			}
 		}
 		#endregion

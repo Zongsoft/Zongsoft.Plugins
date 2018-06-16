@@ -54,17 +54,17 @@ namespace Zongsoft.Plugins.Parsers
 		public static object Parse(string text, PluginTreeNode node, string memberName, Type memberType)
 		{
 			if(node == null)
-				throw new ArgumentNullException("node");
+				throw new ArgumentNullException(nameof(node));
 
-			return Parse(text, node, (scheme, expression, element) => new ParserContext(scheme, expression, node, memberName, memberType));
+			return ParseCore(text, node, (scheme, element) => GetParser(scheme, element), (scheme, expression, element) => new ParserContext(scheme, expression, element, memberName, memberType));
 		}
 
 		public static object Parse(string text, Builtin builtin, string memberName, Type memberType)
 		{
 			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+				throw new ArgumentNullException(nameof(builtin));
 
-			return Parse(text, builtin, (scheam, expression, element) => new ParserContext(scheam, expression, builtin, memberName, memberType));
+			return ParseCore(text, builtin, (scheme, element) => GetParser(scheme, element.Node), (scheam, expression, element) => new ParserContext(scheam, expression, element, memberName, memberType));
 		}
 
 		public static Type GetValueType(string text, Builtin builtin)
@@ -77,47 +77,42 @@ namespace Zongsoft.Plugins.Parsers
 			//解析输入的文本
 			ResolveText(text, out scheme, out value, out prefix, out suffix);
 
-			if(string.IsNullOrWhiteSpace(scheme))
-				return null;
+			if(!string.IsNullOrEmpty(scheme))
+			{
+				//根据当前构件获取一个对应的解析器
+				var parser = GetParser(scheme, builtin.Node);
 
-			Plugin plugin = builtin.Plugin;
+				if(parser != null)
+					return parser.GetValueType(new ParserContext(scheme, value, builtin, null, null));
+			}
 
-			if(plugin == null)
-				return null;
-
-			//通过插件向上查找指定的解析器
-			IParser parser = plugin.GetParser(scheme);
-
-			return parser.GetValueType(new ParserContext(scheme, value, builtin, null, null));
-		}
-
-		public static IParser GetParser(string text, PluginElement element)
-		{
-			if(string.IsNullOrWhiteSpace(text))
-				return null;
-
-			Match match = _regex.Match(text);
-
-			if(!match.Success)
-				return null;
-
-			var scheme = match.Groups["scheme"].Value;
-
-			if(string.IsNullOrWhiteSpace(scheme))
-				return null;
-
-			Plugin plugin = element.Plugin;
-
-			if(plugin == null)
-				return null;
-
-			//通过插件向上查找指定的解析器
-			return plugin.GetParser(scheme);
+			//返回空(失败)
+			return null;
 		}
 		#endregion
 
 		#region 私有方法
-		private static object Parse(string text, PluginElement element, Func<string, string, PluginElement, ParserContext> createContext)
+		private static IParser GetParser(string scheme, PluginTreeNode node)
+		{
+			if(node.Plugin != null)
+				return node.Plugin.GetParser(scheme);
+
+			foreach(var plugin in node.Tree.Plugins)
+			{
+				if(plugin.IsHidden)
+					continue;
+
+				//通过插件向上查找指定的解析器
+				var parser = plugin.GetParser(scheme);
+
+				if(parser != null)
+					return parser;
+			}
+
+			return null;
+		}
+
+		private static object ParseCore<TElement>(string text, TElement element, Func<string, TElement, IParser> parserFactory, Func<string, string, TElement, ParserContext> createContext) where TElement : PluginElement
 		{
 			if(string.IsNullOrWhiteSpace(text))
 				return text;
@@ -130,16 +125,11 @@ namespace Zongsoft.Plugins.Parsers
 			if(string.IsNullOrWhiteSpace(scheme))
 				return value;
 
-			Plugin plugin = element.Plugin;
-
-			if(plugin == null)
-				return null;
-
-			//通过插件向上查找指定的解析器
-			IParser parser = plugin.GetParser(scheme);
+			//根据当前构件获取一个对应的解析器
+			var parser = parserFactory(scheme, element);
 
 			if(parser == null)
-				throw new PluginException(string.Format("This '{0}' parser no found, and use in this '{1}' plugin.", scheme, plugin.Name));
+				throw new PluginException($"The specified '{scheme}' parser was not found.");
 
 			//创建解析器上下文对象
 			var context = createContext(scheme, value, element);

@@ -25,9 +25,9 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Zongsoft.Plugins
 {
@@ -46,10 +46,7 @@ namespace Zongsoft.Plugins
 		#region 构造函数
 		internal BuiltinTypeConstructor(BuiltinType builtinType)
 		{
-			if(builtinType == null)
-				throw new ArgumentNullException("builtinType");
-
-			_builtinType = builtinType;
+			_builtinType = builtinType ?? throw new ArgumentNullException(nameof(builtinType));
 			_parameters = new List<Parameter>();
 		}
 		#endregion

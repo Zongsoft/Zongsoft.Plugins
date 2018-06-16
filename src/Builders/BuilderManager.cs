@@ -74,14 +74,6 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 私有方法
-		private object Build(Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
-		{
-			//获取当前构件的构建器对象
-			IBuilder builder = this.GetBuilder(builtin);
-
-			return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter, owner, ownerNode), null, null);
-		}
-
 		private object BuildCore(IBuilder builder, BuilderContext context, Action<BuilderContext> build, Action<BuilderContext> built)
 		{
 			object value;
@@ -150,11 +142,7 @@ namespace Zongsoft.Plugins.Builders
 				switch(child.NodeType)
 				{
 					case PluginTreeNodeType.Builtin:
-						var builtin = (Builtin)child.Value;
-
-						if(!builtin.IsBuilded)
-							this.Build(builtin, parameter, owner, ownerNode);
-
+						this.BuildChild((Builtin)child.Value, parameter, owner, ownerNode);
 						break;
 					case PluginTreeNodeType.Empty:
 						this.BuildChildren(child, parameter, owner, ownerNode);
@@ -163,6 +151,22 @@ namespace Zongsoft.Plugins.Builders
 						this.BuildChildren(child, parameter, child.Value, child);
 						break;
 				}
+			}
+		}
+
+		private void BuildChild(Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
+		{
+			//获取当前构件的构建器对象
+			IBuilder builder = this.GetBuilder(builtin);
+
+			if(builtin.IsBuilded)
+			{
+				if(owner != null && builder is IAppender appender)
+					appender.Append(new AppenderContext(builtin.Context, builtin.Value, builtin.Node, owner, ownerNode, AppenderBehavior.Append));
+			}
+			else
+			{
+				this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter, owner, ownerNode), null, null);
 			}
 		}
 

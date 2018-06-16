@@ -648,9 +648,6 @@ namespace Zongsoft.Plugins
 			if(ExtendElementRegex.IsMatch(elementName))
 				return true;
 
-			//if(Diagnostics.TracerHelper.Assert(elementName.IndexOf('.') < 0, FailureCodes.InvalidExtendElement, "", Zongsoft.Diagnostics.TraceEntryType.Error))
-			//    throw new PluginException(FailureCodes.InvalidExtendElement, "");
-
 			return false;
 		}
 		#endregion
