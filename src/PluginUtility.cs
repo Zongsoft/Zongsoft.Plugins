@@ -718,7 +718,7 @@ namespace Zongsoft.Plugins
 			}
 		}
 
-		private static Type GetOwnerElementType(PluginTreeNode node)
+		internal static Type GetOwnerElementType(PluginTreeNode node)
 		{
 			var ownerNode = node.Tree.GetOwnerNode(node);
 

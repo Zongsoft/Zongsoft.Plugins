@@ -47,13 +47,20 @@ namespace Zongsoft.Plugins.Builders
 		#region 重写方法
 		public override Type GetValueType(Builtin builtin)
 		{
-			if(builtin == null)
-				return base.GetValueType(builtin);
+			//调用基类同名方法
+			var type = base.GetValueType(builtin);
 
-			if(builtin.Properties.TryGet("value", out var property) && Parsers.Parser.CanParse(property.RawValue))
-				return Parsers.Parser.GetValueType(property.RawValue, builtin);
+			if(type == null)
+			{
+				//尝试获取value属性值的类型
+				if(builtin.Properties.TryGet("value", out var property) && Parsers.Parser.CanParse(property.RawValue))
+					return Parsers.Parser.GetValueType(property.RawValue, builtin);
 
-			return base.GetValueType(builtin);
+				//返回所有者元素类型（如果所有者如果是一个泛型集合的话，否则返回空）
+				return PluginUtility.GetOwnerElementType(builtin.Node);
+			}
+
+			return type;
 		}
 
 		public override object Build(BuilderContext context)
@@ -72,9 +79,13 @@ namespace Zongsoft.Plugins.Builders
 
 				//更新构件属性到目标对象的属性中
 				PluginUtility.UpdateProperties(result, context.Builtin, ignoredProperties);
+
+				//你会value属性值
+				return result;
 			}
 
-			return result;
+			//调用基类同名方法
+			return base.Build(context);
 		}
 		#endregion
 

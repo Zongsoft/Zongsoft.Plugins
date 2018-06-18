@@ -65,10 +65,13 @@ namespace Zongsoft.Plugins.Builders
 		#region 获取类型
 		public virtual Type GetValueType(Builtin builtin)
 		{
-			if(builtin != null && builtin.BuiltinType != null)
+			if(builtin.HasValue)
+				return builtin.Value.GetType();
+
+			if(builtin.BuiltinType != null)
 				return builtin.BuiltinType.Type;
 
-			var attribute = (Builders.BuilderBehaviorAttribute)Attribute.GetCustomAttribute(this.GetType(), typeof(Builders.BuilderBehaviorAttribute), true);
+			var attribute = (BuilderBehaviorAttribute)Attribute.GetCustomAttribute(this.GetType(), typeof(BuilderBehaviorAttribute), true);
 
 			if(attribute != null)
 				return attribute.ValueType;
