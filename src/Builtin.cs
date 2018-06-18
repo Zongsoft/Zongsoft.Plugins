@@ -317,17 +317,7 @@ namespace Zongsoft.Plugins
 			var builder = this.Plugin.GetBuilder(_builderName);
 
 			if(builder != null)
-			{
-				var result = builder.GetValueType(this);
-
-				if(result != null)
-					return result;
-
-				var attribute = (Builders.BuilderBehaviorAttribute)Attribute.GetCustomAttribute(builder.GetType(), typeof(Builders.BuilderBehaviorAttribute), true);
-
-				if(attribute != null)
-					return attribute.ValueType;
-			}
+				return builder.GetValueType(this);
 
 			return null;
 		}
