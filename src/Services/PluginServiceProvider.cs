@@ -207,38 +207,21 @@ namespace Zongsoft.Services
 			#endregion
 
 			#region 构造函数
-			internal PluginServiceEntry(PluginTreeNode node)
+			internal PluginServiceEntry(PluginTreeNode node) : base(node.Name)
 			{
-				if(node == null)
-					throw new ArgumentNullException("node");
-
 				_node = node;
 			}
 			#endregion
 
-			#region 公共属性
-			public override string Name
+			#region 重写方法
+			protected override Type GetServiceType()
 			{
-				get
-				{
-					return _node.Name;
-				}
+				return _node.ValueType;
 			}
 
-			public override Type ServiceType
+			protected override object CreateService()
 			{
-				get
-				{
-					return _node.ValueType;
-				}
-			}
-
-			public override object Service
-			{
-				get
-				{
-					return _node.UnwrapValue(ObtainMode.Auto, this);
-				}
+				return _node.UnwrapValue(ObtainMode.Auto, this);
 			}
 			#endregion
 		}
