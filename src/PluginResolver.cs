@@ -101,9 +101,6 @@ namespace Zongsoft.Plugins
 						case "manifest":
 							this.MoveToEndElement(reader);
 							break;
-						case "modules":
-							this.ResolveModules(reader, plugin);
-							break;
 						case "parsers":
 							this.ResolveParsers(reader, plugin);
 							break;
@@ -160,9 +157,6 @@ namespace Zongsoft.Plugins
 							if(reader.NodeType == XmlNodeType.EndElement)
 								reader.Read();
 
-							break;
-						case "modules":
-							reader.Skip();
 							break;
 						case "parsers":
 							reader.Skip();
@@ -225,9 +219,6 @@ namespace Zongsoft.Plugins
 				{
 					case "manifest":
 						this.ResolveManifest(reader, plugin);
-						break;
-					case "modules":
-						this.ResolveModules(reader, plugin);
 						break;
 					case "parsers":
 						this.ResolveParsers(reader, plugin);
@@ -307,20 +298,6 @@ namespace Zongsoft.Plugins
 			{
 				plugin.Manifest.Dependencies.SetDependency(reader.GetAttribute("name"));
 			} while(reader.ReadToNextSibling("dependency"));
-		}
-
-		private void ResolveModules(XmlReader reader, Plugin plugin)
-		{
-			if(reader.Name == "modules")
-				reader.Read();
-
-			if(reader.Name != "module")
-				return;
-
-			do
-			{
-				plugin.Modules.Add(reader.GetAttribute("type"), reader.GetAttribute("name"), plugin);
-			} while(reader.ReadToNextSibling("module"));
 		}
 
 		private void ResolveParsers(XmlReader reader, Plugin plugin)

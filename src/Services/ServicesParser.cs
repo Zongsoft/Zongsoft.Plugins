@@ -31,7 +31,7 @@ using System.Text.RegularExpressions;
 using Zongsoft.Plugins;
 using Zongsoft.Plugins.Parsers;
 
-namespace Zongsoft.Services.Plugins.Parsers
+namespace Zongsoft.Services.Plugins
 {
 	/// <summary>
 	/// 服务解析器类。
@@ -187,13 +187,13 @@ namespace Zongsoft.Services.Plugins.Parsers
 
 		private IServiceProvider FindServiceProvider(ParserContext context, Match match)
 		{
-			if(context == null || context.PluginContext.ServiceFactory == null)
+			if(context == null || context.PluginContext.ApplicationContext.Services == null)
 				return null;
 
 			if(match == null || (!match.Success))
 				return null;
 
-			var serviceFactory = context.PluginContext.ServiceFactory;
+			var serviceFactory = Services.ServiceProviderFactory.Instance;
 
 			//如果指定的服务容器名则返回其指定名称的服务容器
 			if(match.Groups[PROVIDER_GROUP].Success)

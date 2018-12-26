@@ -25,17 +25,14 @@
  */
 
 using System;
-using System.Reflection;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Resources;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Zongsoft.Plugins;
 using Zongsoft.Plugins.Parsers;
 
-namespace Zongsoft.Resources.Plugins.Parsers
+namespace Zongsoft.Resources.Plugins
 {
 	public class ResourceParser : Parser
 	{

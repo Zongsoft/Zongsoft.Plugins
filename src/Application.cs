@@ -29,32 +29,22 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Threading;
 
-using Zongsoft.ComponentModel;
-
 namespace Zongsoft.Plugins
 {
 	public static class Application
 	{
 		#region 事件声明
-		public static event EventHandler<ApplicationEventArgs> Starting;
-		public static event EventHandler<ApplicationEventArgs> Started;
-		public static event CancelEventHandler Exiting;
+		public static event EventHandler Exiting;
+		public static event EventHandler Starting;
+		public static event EventHandler Started;
 		#endregion
 
 		#region 成员变量
-		private static int _isStarted;
+		private static int _flags;
 		private static PluginApplicationContext _context;
 		#endregion
 
 		#region 公共属性
-		public static bool IsStarted
-		{
-			get
-			{
-				return _isStarted != 0;
-			}
-		}
-
 		public static PluginApplicationContext Context
 		{
 			get
@@ -68,17 +58,11 @@ namespace Zongsoft.Plugins
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
 		public static void Start(PluginApplicationContext context, params string[] args)
 		{
-			if(context == null)
-				throw new ArgumentNullException("context");
-
-			if(_isStarted != 0)
-				return;
+			//保存当前上下文对象
+			_context = context ?? throw new ArgumentNullException(nameof(context));
 
 			//激发“Starting”事件
-			OnStarting(context);
-
-			//激发应用上下文对象的“Starting”事件
-			context.RaiseStarting(args);
+			OnStarting(args);
 
 			#if !DEBUG
 			try
@@ -93,28 +77,19 @@ namespace Zongsoft.Plugins
 					_context.PluginContext.PluginTree.Mount(_context.PluginContext.Settings.ApplicationContextPath, _context);
 
 					//将应用上下文对象注册到默认服务容器中
-					if(_context.ServiceFactory != null && _context.ServiceFactory.Default != null)
-						_context.ServiceFactory.Default.Register("ApplicationContext", _context);
+					if(_context.Services != null)
+						_context.Services.Register("ApplicationContext", _context);
 				};
 
 				//初始化全局模块
-				InitializeGlobalModules(context);
+				InitializeGlobals(context);
 
 				//加载插件树
 				context.PluginContext.PluginTree.Load();
 
-				//初始化插件模块
-				InitializePluginModules(context, context.PluginContext.PluginTree.Plugins);
-
-				//激发应用上下文对象的“Initializing”事件
-				context.RaiseInitializing(args);
-
 				//如果工作台对象不为空则运行工作台
 				if(context.GetWorkbench(args) != null)
 				{
-					//激发应用上下文对象的“Initialized”事件
-					context.RaiseInitialized(args);
-
 					//注意：因为工作台很可能会阻塞当前主线程，所以需要利用其Opened事件进行注册
 					context.Workbench.Opened += delegate
 					{
@@ -159,31 +134,18 @@ namespace Zongsoft.Plugins
 			if(context == null)
 				return;
 
-			//重置启动标记
-			_isStarted = 0;
-
-			//创建取消事件参数
-			CancelEventArgs args = new CancelEventArgs();
-
 			//激发“Exiting”事件
-			OnExiting(args);
-
-			//激发应用上下文对象的“Exiting”事件
-			context.RaiseExiting(args);
-
-			//判断是否取消退出，如果是则退出
-			if(args.Cancel)
-				return;
+			OnExiting(context);
 
 			//关闭工作台
 			if(context.Workbench != null)
 				context.Workbench.Close();
 
-			//卸载插件模块
-			DisposePluginModules(context);
-
 			//卸载全局模块
-			DisposeGlobalModules(context);
+			DisposeGlobals(context);
+
+			//重置标记
+			_flags = 0;
 
 			//将当前应用上下文对象从列表中删除
 			_context = null;
@@ -198,43 +160,46 @@ namespace Zongsoft.Plugins
 			if(context == null)
 				return;
 
-			if(Interlocked.CompareExchange(ref _isStarted, 1, 0) == 0)
+			if(Interlocked.CompareExchange(ref _flags, 1, 0) == 0)
 			{
 				//激发“Started”事件
-				OnStarted(context);
+				OnStarted(args);
 
 				//激发应用上下文对象的“Started”事件
 				context.RaiseStarted(args);
 			}
 		}
 
-		private static void OnExiting(CancelEventArgs args)
+		private static void OnExiting(PluginApplicationContext context)
 		{
-			var handler = Exiting;
+			if(context == null)
+				return;
 
-			if(handler != null)
-				handler(null, args);
+			Exiting?.Invoke(context, EventArgs.Empty);
+
+			//激发当前上下文的“Exiting”事件
+			context.RaiseExiting();
 		}
 
-		private static void OnStarting(PluginApplicationContext context)
+		private static void OnStarting(string[] args)
 		{
-			var handler = Starting;
+			Starting?.Invoke(null, EventArgs.Empty);
 
-			if(handler != null)
-				handler(null, new ApplicationEventArgs(context));
+			//激发当前上下文的“Starting”事件
+			_context.RaiseStarting(args);
 		}
 
-		private static void OnStarted(PluginApplicationContext context)
+		private static void OnStarted(string[] args)
 		{
-			var handler = Started;
+			Started?.Invoke(null, EventArgs.Empty);
 
-			if(handler != null)
-				handler(null, new ApplicationEventArgs(context));
+			//激发当前上下文的“Started”事件
+			_context.RaiseStarted(args);
 		}
 		#endregion
 
 		#region 调用模块
-		private static void InitializeGlobalModules(PluginApplicationContext context)
+		private static void InitializeGlobals(PluginApplicationContext context)
 		{
 			if(context == null)
 				return;
@@ -243,25 +208,25 @@ namespace Zongsoft.Plugins
 
 			if(configuration != null)
 			{
-				var modules = configuration.GetOptionValue("/modules") as Zongsoft.Options.Configuration.ModuleElementCollection;
+				var filters = configuration.GetOptionValue("/filters") as Zongsoft.Options.Configuration.FilterElementCollection;
 
-				if(modules != null && modules.Count > 0)
+				if(filters != null && filters.Count > 0)
 				{
-					foreach(Zongsoft.Options.Configuration.ModuleElement module in modules)
+					foreach(var filter in filters)
 					{
-						context.Modules.Add(module.CreateModule());
+						context.Filters.Add(CreateInitializer((Options.Configuration.FilterElement)filter));
 					}
 				}
 			}
 
-			foreach(var module in context.Modules)
+			foreach(var filter in context.Filters)
 			{
-				if(module != null)
-					module.Initialize(context);
+				if(filter != null)
+					filter.Initialize(context);
 			}
 		}
 
-		private static void DisposeGlobalModules(PluginApplicationContext context)
+		private static void DisposeGlobals(PluginApplicationContext context)
 		{
 			if(context == null)
 				return;
@@ -273,48 +238,20 @@ namespace Zongsoft.Plugins
 			}
 		}
 
-		private static void InitializePluginModules(PluginApplicationContext context, IEnumerable<Plugin> plugins)
+		private static Zongsoft.Services.IApplicationFilter CreateInitializer(Options.Configuration.FilterElement element)
 		{
-			if(context == null || plugins == null)
-				return;
+			if(string.IsNullOrWhiteSpace(element.Type))
+				throw new Options.Configuration.OptionConfigurationException("The application-filter type is empty or unspecified.");
 
-			foreach(Plugin plugin in plugins)
-			{
-				if(plugin.Status != PluginStatus.Loaded)
-					continue;
+			var type = System.Type.GetType(element.Type, false);
 
-				foreach(FixedElement<IApplicationModule> module in plugin.Modules)
-				{
-					if(module.Value != null)
-						module.Value.Initialize(context);
-				}
+			if(type == null)
+				throw new Options.Configuration.OptionConfigurationException($"Invalid '{element.Type}' type of application-filter, becase cann't load it.");
 
-				if(plugin.Children.Count > 0)
-					InitializePluginModules(context, plugin.Children);
-			}
-		}
+			if(!typeof(Zongsoft.Services.IApplicationFilter).IsAssignableFrom(type))
+				throw new Options.Configuration.OptionConfigurationException($"Invalid '{element.Type}' type of application-filter, it doesn't implemented {nameof(Services.IApplicationFilter)} interface.");
 
-		private static void DisposePluginModules(PluginApplicationContext context)
-		{
-			if(context == null)
-				return;
-
-			foreach(Plugin plugin in context.PluginContext.PluginTree.Plugins)
-			{
-				if(plugin.Status != PluginStatus.Loaded)
-					continue;
-
-				foreach(FixedElement<IApplicationModule> module in plugin.Modules)
-				{
-					if(module.HasValue)
-					{
-						var disposable = module.Value as IDisposable;
-
-						if(disposable != null)
-							disposable.Dispose();
-					}
-				}
-			}
+			return Activator.CreateInstance(type) as Zongsoft.Services.IApplicationFilter;
 		}
 		#endregion
 	}

@@ -51,9 +51,8 @@ namespace Zongsoft.Plugins
 		private PluginCollection _children;
 		private List<Builtin> _builtins;
 
-		private FixedElementCollection<IParser> _parsers;
-		private FixedElementCollection<IApplicationModule> _modules;
 		private BuilderElementCollection _builders;
+		private FixedElementCollection<IParser> _parsers;
 		#endregion
 
 		#region 构造函数
@@ -86,7 +85,6 @@ namespace Zongsoft.Plugins
 			_children = new PluginCollection(this);
 			_builtins = new List<Builtin>();
 
-			_modules = new FixedElementCollection<IApplicationModule>();
 			_parsers = new FixedElementCollection<IParser>();
 			_builders = new BuilderElementCollection();
 		}
@@ -265,17 +263,6 @@ namespace Zongsoft.Plugins
 			get
 			{
 				return _builders;
-			}
-		}
-
-		/// <summary>
-		/// 获取当前插件的所有模块元素集合。
-		/// </summary>
-		public FixedElementCollection<IApplicationModule> Modules
-		{
-			get
-			{
-				return _modules;
 			}
 		}
 

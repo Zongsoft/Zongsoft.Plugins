@@ -25,26 +25,29 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
 
 namespace Zongsoft.Plugins
 {
-	public class PluginApplicationContext : Zongsoft.ComponentModel.ApplicationContextBase
+	public class PluginApplicationContext : Zongsoft.Services.ApplicationContext
 	{
 		#region 事件声明
 		public event EventHandler WorkbenchCreated;
 		#endregion
 
 		#region 成员变量
+		private readonly object _syncRoot;
 		private IWorkbenchBase _workbench;
-		private PluginContext _pluginContext;
+		private readonly PluginContext _pluginContext;
 		#endregion
 
 		#region 构造函数
-		protected PluginApplicationContext(string applicationId) : base(applicationId)
+		protected PluginApplicationContext(string name) : base(name)
 		{
-			this.Modules.Add(new Zongsoft.Options.Plugins.OptionModule());
+			_syncRoot = new object();
+			_pluginContext = new PluginContext(this.CreatePluginSetup(), this);
+
+			//将选项初始化器加入到应用初始化集中
+			this.Filters.Add(new Zongsoft.Options.Plugins.OptionInitializer());
 		}
 		#endregion
 
@@ -73,15 +76,6 @@ namespace Zongsoft.Plugins
 		{
 			get
 			{
-				if(_pluginContext == null)
-				{
-					lock(SyncRoot)
-					{
-						if(_pluginContext == null)
-							_pluginContext = new PluginContext(this.CreatePluginSetup(), this);
-					}
-				}
-
 				return _pluginContext;
 			}
 		}
@@ -128,7 +122,7 @@ namespace Zongsoft.Plugins
 		{
 			if(_workbench == null)
 			{
-				lock(SyncRoot)
+				lock(_syncRoot)
 				{
 					if(_workbench == null)
 					{
@@ -175,27 +169,21 @@ namespace Zongsoft.Plugins
 		#region 激发事件
 		internal void RaiseStarting(string[] args)
 		{
-			this.OnStarting(new ComponentModel.ApplicationEventArgs(this, args));
+			//更新当前应用的上下文
+			Current = this;
+
+			//激发“Starting”事件
+			this.OnStarting(EventArgs.Empty);
 		}
 
 		internal void RaiseStarted(string[] args)
 		{
-			this.OnStarted(new ComponentModel.ApplicationEventArgs(this, args));
+			this.OnStarted(EventArgs.Empty);
 		}
 
-		internal void RaiseInitializing(string[] args)
+		internal void RaiseExiting()
 		{
-			this.OnInitializing(new ComponentModel.ApplicationEventArgs(this, args));
-		}
-
-		internal void RaiseInitialized(string[] args)
-		{
-			this.OnInitialized(new ComponentModel.ApplicationEventArgs(this, args));
-		}
-
-		internal void RaiseExiting(CancelEventArgs args)
-		{
-			this.OnExiting(args);
+			this.OnExiting(EventArgs.Empty);
 		}
 		#endregion
 

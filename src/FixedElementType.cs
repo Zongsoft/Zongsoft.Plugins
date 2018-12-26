@@ -39,8 +39,5 @@ namespace Zongsoft.Plugins
 
 		/// <summary>解析器，指实现了 <seealso cref="Zongsoft.Plugins.IParser"/> 接口的类。</summary>
 		Parser = 1,
-
-		/// <summary>模块，指实现了 <seealso cref="Zongsoft.ComponentModel.IApplicationModule"/> 接口的类。</summary>
-		Module = 2,
 	}
 }

@@ -29,12 +29,11 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using Zongsoft.Plugins;
 using Zongsoft.Plugins.Builders;
 
-namespace Zongsoft.ComponentModel.Plugins.Builders
+namespace Zongsoft.ComponentModel.Plugins
 {
 	public class ComponentBuilder : Zongsoft.Plugins.Builders.BuilderBase
 	{

@@ -96,17 +96,6 @@ namespace Zongsoft.Plugins
 		}
 
 		/// <summary>
-		/// 获取当前插件运行时的服务供应程序工厂。
-		/// </summary>
-		public Zongsoft.Services.IServiceProviderFactory ServiceFactory
-		{
-			get
-			{
-				return _applicationContext.ServiceFactory;
-			}
-		}
-
-		/// <summary>
 		/// 获取当前插件上下文对应的设置。
 		/// </summary>
 		public PluginSetup Settings

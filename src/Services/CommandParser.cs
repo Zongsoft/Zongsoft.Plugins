@@ -27,30 +27,45 @@
 using System;
 using System.Collections.Generic;
 
-using Zongsoft.Plugins;
+using Zongsoft.Services;
 using Zongsoft.Plugins.Parsers;
 
-namespace Zongsoft.Options.Plugins.Parsers
+namespace Zongsoft.Services.Plugins
 {
-	public class OptionParser : Parser
+	public class CommandParser : Parser
 	{
 		#region 解析方法
 		public override object Parse(ParserContext context)
 		{
-			if(string.IsNullOrWhiteSpace(context.Text))
-				return null;
+			return new DelegateCommand(context.Text);
+		}
+		#endregion
 
-			var expression = PluginPath.Parse(context.Text);
+		#region 嵌套子类
+		private class DelegateCommand : CommandBase
+		{
+			#region 私有变量
+			private string _commandText;
+			#endregion
 
-			if(expression != null)
+			#region 构造函数
+			public DelegateCommand(string commandText)
 			{
-				object target = context.PluginContext.ApplicationContext.OptionManager.GetOptionValue(expression.Path);
-
-				if(target != null)
-					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);
+				_commandText = commandText;
 			}
+			#endregion
 
-			return null;
+			#region 执行方法
+			protected override object OnExecute(object parameter)
+			{
+				var commandExecutor = CommandExecutor.Default;
+
+				if(commandExecutor == null)
+					throw new InvalidOperationException("Can not get the CommandExecutor from 'Zongsoft.Services.CommandExecutor.Default' static member.");
+
+				return commandExecutor.Execute(_commandText, parameter);
+			}
+			#endregion
 		}
 		#endregion
 	}

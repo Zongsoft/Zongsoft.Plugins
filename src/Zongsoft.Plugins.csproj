@@ -67,8 +67,7 @@
     <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\TreeCommand.cs" />
     <Compile Include="Commands\Utility.cs" />
-    <Compile Include="Options\Builders\OptionBuilder.cs" />
-    <Compile Include="Options\OptionModule.cs" />
+    <Compile Include="Options\OptionInitializer.cs" />
     <Compile Include="Options\OptionUtility.cs" />
     <Compile Include="Options\PluginSettingsProvider.cs" />
     <Compile Include="Options\PluginSettingsProviderFactory.cs" />
@@ -80,16 +79,15 @@
     <Compile Include="PluginElementPropertyCollection.cs" />
     <Compile Include="IAppender.cs" />
     <Compile Include="BuiltinTypeConstructor.cs" />
-    <Compile Include="ComponentModel\Builders\ComponentBuilder.cs" />
+    <Compile Include="ComponentModel\ComponentBuilder.cs" />
     <Compile Include="AppenderBehavior.cs" />
     <Compile Include="AppenderContext.cs" />
     <Compile Include="ObtainMode.cs" />
     <Compile Include="Parsers\ParserContext.cs" />
-    <Compile Include="Options\Parsers\OptionParser.cs" />
+    <Compile Include="Options\OptionParser.cs" />
     <Compile Include="Parsers\PluginPathParser.cs" />
     <Compile Include="Parsers\TypeParser.cs" />
     <Compile Include="PluginApplicationContext.cs" />
-    <Compile Include="ApplicationEventArgs.cs" />
     <Compile Include="BuilderElement.cs" />
     <Compile Include="BuilderElementCollection.cs" />
     <Compile Include="Builders\BuilderBase.cs" />
@@ -103,11 +101,11 @@
     <Compile Include="IWorkbench.cs" />
     <Compile Include="IWorkbenchBase.cs" />
     <Compile Include="Parsers\Parser.cs" />
-    <Compile Include="Services\Parsers\CommandParser.cs">
+    <Compile Include="Services\CommandParser.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Services\Parsers\PredicateParser.cs" />
-    <Compile Include="Services\Parsers\ServicesParser.cs" />
+    <Compile Include="Services\PredicateParser.cs" />
+    <Compile Include="Services\ServicesParser.cs" />
     <Compile Include="PluginContainer.cs" />
     <Compile Include="PluginDependency.cs" />
     <Compile Include="PluginDependencyCollection.cs" />

@@ -477,7 +477,7 @@ namespace Zongsoft.Plugins
 				return true;
 			}
 
-			if(typeof(Zongsoft.ComponentModel.ApplicationContextBase).IsAssignableFrom(parameterType))
+			if(typeof(Zongsoft.Services.IApplicationContext).IsAssignableFrom(parameterType))
 			{
 				parameterValue = plugin.Context.ApplicationContext;
 				return true;
@@ -485,13 +485,13 @@ namespace Zongsoft.Plugins
 
 			if(typeof(Zongsoft.Services.IServiceProviderFactory).IsAssignableFrom(parameterType))
 			{
-				parameterValue = plugin.Context.ServiceFactory;
+				parameterValue = Services.ServiceProviderFactory.Instance;
 				return true;
 			}
 
 			if(typeof(Zongsoft.Services.IServiceProvider).IsAssignableFrom(parameterType))
 			{
-				parameterValue = plugin.Context.ServiceFactory.Default;
+				parameterValue = plugin.Context.ApplicationContext.Services;
 				return true;
 			}
 
@@ -509,7 +509,7 @@ namespace Zongsoft.Plugins
 
 			if(typeof(Zongsoft.Options.IOptionProvider).IsAssignableFrom(parameterType))
 			{
-				parameterValue = plugin.Context.ApplicationContext.OptionManager;
+				parameterValue = plugin.Context.ApplicationContext.Options;
 				return true;
 			}
 
@@ -530,9 +530,24 @@ namespace Zongsoft.Plugins
 				return null;
 
 			if(builtin.Node != null && builtin.Node.Parent != null)
-				return builtin.Context.ServiceFactory.GetProvider(builtin.Node.Parent.Name) ?? builtin.Context.ServiceFactory.Default;
+			{
+				var node = builtin.Node.Parent;
 
-			return builtin.Context.ServiceFactory.Default;
+				while(node != null)
+				{
+					var nodeValue = node.UnwrapValue(ObtainMode.Auto);
+
+					if(nodeValue != null && nodeValue is Zongsoft.Services.IApplicationModule module)
+						return module.Services ?? builtin.Context.ApplicationContext.Services;
+
+					node = node.Parent;
+				}
+			}
+
+			if(builtin.Node != null && builtin.Node.Parent != null)
+				return Services.ServiceProviderFactory.Instance.GetProvider(builtin.Node.Parent.Name) ?? builtin.Context.ApplicationContext.Services;
+
+			return builtin.Context.ApplicationContext.Services;
 		}
 
 		internal static int GetAnonymousId(string assortment)
@@ -690,7 +705,7 @@ namespace Zongsoft.Plugins
 				if(attribute == null || string.IsNullOrWhiteSpace(attribute.Provider))
 					serviceProvider = reserveProvider;
 				else
-					serviceProvider = builtin.Context.ServiceFactory.GetProvider(attribute.Provider) ?? reserveProvider;
+					serviceProvider = Services.ServiceProviderFactory.Instance.GetProvider(attribute.Provider) ?? reserveProvider;
 
 				switch(member.MemberType)
 				{

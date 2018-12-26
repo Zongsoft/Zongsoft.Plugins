@@ -160,27 +160,6 @@
 					<xs:field xpath="@name" />
 				</xs:key>
 			</xs:element>
-
-			<xs:element name="modules" minOccurs="0" maxOccurs="1">
-				<xs:annotation>
-					<xs:documentation xml:lang="zh">表示系统模块集。</xs:documentation>
-				</xs:annotation>
-
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="module" type="NameTypeElement" minOccurs="1" maxOccurs="unbounded">
-							<xs:annotation>
-								<xs:documentation xml:lang="zh">要注册的模块定义。</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-					</xs:sequence>
-				</xs:complexType>
-
-				<xs:key name="moduleKey">
-					<xs:selector xpath="./module" />
-					<xs:field xpath="@name" />
-				</xs:key>
-			</xs:element>
 		</xs:sequence>
 	</xs:group>
 

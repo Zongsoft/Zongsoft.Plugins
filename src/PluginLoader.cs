@@ -320,19 +320,8 @@ namespace Zongsoft.Plugins
 				}
 			}
 
-			foreach(FixedElement<IApplicationModule> element in plugin.Modules)
-			{
-				if(element.HasValue)
-				{
-					IDisposable disposable = element.Value as IDisposable;
-					if(disposable != null)
-						disposable.Dispose();
-				}
-			}
-
 			plugin.Builders.Clear();
 			plugin.Parsers.Clear();
-			plugin.Modules.Clear();
 		}
 
 		private void UnloadBuilder(BuilderElement builderElement)

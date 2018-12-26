@@ -31,7 +31,7 @@ using Zongsoft.Plugins;
 
 namespace Zongsoft.Options.Plugins
 {
-	public class OptionModule : Zongsoft.ComponentModel.IApplicationModule
+	public class OptionInitializer : Zongsoft.Services.IApplicationFilter
 	{
 		#region 公共属性
 		public string Name
@@ -51,13 +51,13 @@ namespace Zongsoft.Options.Plugins
 
 			//将当前应用的主配置文件加入到选项管理器中
 			if(context.Configuration != null)
-				context.OptionManager.Providers.Add(context.Configuration);
+				OptionManager.Instance.Providers.Add(context.Configuration);
 
 			context.PluginContext.PluginTree.Loader.PluginLoaded += Loader_PluginLoaded;
 			context.PluginContext.PluginTree.Loader.PluginUnloaded += Loader_PluginUnloaded;
 		}
 
-		void Zongsoft.ComponentModel.IApplicationModule.Initialize(Zongsoft.ComponentModel.ApplicationContextBase context)
+		void Zongsoft.Services.IApplicationFilter.Initialize(Zongsoft.Services.IApplicationContext context)
 		{
 			this.Initialize(context as PluginApplicationContext);
 		}
@@ -69,13 +69,13 @@ namespace Zongsoft.Options.Plugins
 			if(OptionUtility.HasConfigurationFile(e.Plugin))
 			{
 				var proxy = new ConfigurationProxy(() => OptionUtility.GetConfiguration(e.Plugin));
-				e.Plugin.Context.ApplicationContext.OptionManager.Providers.Add(proxy);
+				OptionManager.Instance.Providers.Add(proxy);
 			}
 		}
 
 		private void Loader_PluginUnloaded(object sender, PluginUnloadedEventArgs e)
 		{
-			var providers = e.Plugin.Context.ApplicationContext.OptionManager.Providers;
+			var providers = OptionManager.Instance.Providers;
 
 			var found = providers.FirstOrDefault(provider =>
 			{

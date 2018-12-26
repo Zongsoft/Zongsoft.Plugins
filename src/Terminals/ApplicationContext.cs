@@ -45,7 +45,6 @@ namespace Zongsoft.Terminals.Plugins
 		#region 私有构造
 		private ApplicationContext() : base("Zongsoft.Terminals.Plugins")
 		{
-			Zongsoft.ComponentModel.ApplicationContextBase.Current = this;
 		}
 		#endregion
 
@@ -59,9 +58,9 @@ namespace Zongsoft.Terminals.Plugins
 					string filePaht = Path.Combine(this.ApplicationDirectory, Assembly.GetEntryAssembly().GetName().Name) + ".option";
 
 					if(File.Exists(filePaht))
-						_configuration = Options.Configuration.OptionConfiguration.Load(filePaht);
+						_configuration = Zongsoft.Options.Configuration.OptionConfiguration.Load(filePaht);
 					else
-						_configuration = new Options.Configuration.OptionConfiguration(filePaht);
+						_configuration = new Zongsoft.Options.Configuration.OptionConfiguration(filePaht);
 				}
 
 				return _configuration;

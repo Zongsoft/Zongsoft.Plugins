@@ -27,26 +27,30 @@
 using System;
 using System.Collections.Generic;
 
-namespace Zongsoft.Plugins
+using Zongsoft.Plugins;
+using Zongsoft.Plugins.Parsers;
+
+namespace Zongsoft.Options.Plugins
 {
-	[Serializable]
-	public class ApplicationEventArgs : EventArgs
+	public class OptionParser : Parser
 	{
-		#region 构造函数
-		public ApplicationEventArgs(PluginApplicationContext context)
+		#region 解析方法
+		public override object Parse(ParserContext context)
 		{
-			if(context == null)
-				throw new ArgumentNullException("context");
+			if(string.IsNullOrWhiteSpace(context.Text))
+				return null;
 
-			this.Context = context;
-		}
-		#endregion
+			var expression = PluginPath.Parse(context.Text);
 
-		#region 公共属性
-		public PluginApplicationContext Context
-		{
-			get;
-			private set;
+			if(expression != null)
+			{
+				object target = OptionManager.Instance.GetOptionValue(expression.Path);
+
+				if(target != null)
+					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);
+			}
+
+			return null;
 		}
 		#endregion
 	}

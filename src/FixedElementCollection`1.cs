@@ -47,8 +47,6 @@ namespace Zongsoft.Plugins
 					return FixedElementType.Parser;
 				if(typeof(IBuilder).IsAssignableFrom(typeof(T)))
 					return FixedElementType.Builder;
-				if(typeof(Zongsoft.ComponentModel.IApplicationModule).IsAssignableFrom(typeof(T)))
-					return FixedElementType.Module;
 
 				throw new PluginException();
 			}
