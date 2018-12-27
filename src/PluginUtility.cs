@@ -539,7 +539,7 @@ namespace Zongsoft.Plugins
 
 					if(valueType == null || typeof(Services.IApplicationModule).IsAssignableFrom(valueType))
 					{
-						var value = node.UnwrapValue(ObtainMode.Auto, null, ctx => ctx.Cancel = true);
+						var value = node.UnwrapValue(ObtainMode.Auto, Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreChildren));
 
 						if(value != null && value is Zongsoft.Services.IApplicationModule module)
 							return module.Services ?? builtin.Context.ApplicationContext.Services;

@@ -58,6 +58,8 @@
     <Compile Include="Builders\BuilderContext.cs" />
     <Compile Include="Builders\BuilderEventArgs.cs" />
     <Compile Include="Builders\BuilderManager.cs" />
+    <Compile Include="Builders\BuilderSettings.cs" />
+    <Compile Include="Builders\BuilderSettingsFlags.cs" />
     <Compile Include="Builders\LazyBuilder.cs" />
     <Compile Include="Builders\LinkBuilder.cs" />
     <Compile Include="BuiltinBehavior.cs" />

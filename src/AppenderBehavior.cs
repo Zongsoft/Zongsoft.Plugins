@@ -31,10 +31,12 @@ namespace Zongsoft.Plugins
 {
 	public enum AppenderBehavior
 	{
+		/// <summary>追加</summary>
 		[Description("追加")]
-		Append,
+		Appending,
 
+		/// <summary>替换</summary>
 		[Description("替换")]
-		Replace,
+		Replacement,
 	}
 }

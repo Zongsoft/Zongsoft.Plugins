@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -25,31 +25,19 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
-namespace Zongsoft.Collections.Plugins
+namespace Zongsoft.Plugins.Builders
 {
-	public class HasCollectionPredication : Zongsoft.Services.PredicationBase<Zongsoft.Services.Plugins.PluginPredicationContext>
+	[Flags]
+	public enum BuilderSettingsFlags
 	{
-		public HasCollectionPredication(string name) : base(name)
-		{
-		}
+		/// <summary>无。</summary>
+		None = 0,
 
-		public override bool Predicate(Services.Plugins.PluginPredicationContext context)
-		{
-			if(context == null || context.Node == null)
-				return false;
+		/// <summary>禁止构建子元素。</summary>
+		IgnoreChildren = 1,
 
-			var target = context.Node.UnwrapValue(Zongsoft.Plugins.ObtainMode.Never);
-			ICollection collection;
-
-			if(string.IsNullOrWhiteSpace(context.Parameter))
-				collection = target as ICollection;
-			else
-				collection = Reflection.MemberAccess.GetMemberValue<object>(target, context.Parameter) as ICollection;
-
-			return collection != null && collection.Count > 0;
-		}
+		/// <summary>禁止追加操作。</summary>
+		IgnoreAppending = 2,
 	}
 }

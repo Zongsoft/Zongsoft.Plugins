@@ -165,7 +165,7 @@ namespace Zongsoft.Services
 					//本地查找成功则返回
 					if(node != null)
 					{
-						var result = node.UnwrapValue(ObtainMode.Auto, null);
+						var result = node.UnwrapValue(ObtainMode.Auto);
 
 						if(result is ServiceEntry)
 							return (ServiceEntry)result;
@@ -221,7 +221,7 @@ namespace Zongsoft.Services
 
 			protected override object CreateService()
 			{
-				return _node.UnwrapValue(ObtainMode.Auto, this);
+				return _node.UnwrapValue(ObtainMode.Auto);
 			}
 			#endregion
 		}

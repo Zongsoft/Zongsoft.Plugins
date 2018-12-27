@@ -339,7 +339,7 @@ namespace Zongsoft.Plugins
 			if(node == null)
 				return;
 
-			object target = node.UnwrapValue(ObtainMode.Auto, this, null);
+			object target = node.UnwrapValue(ObtainMode.Auto);
 
 			if(target is IWorker worker && worker.Enabled)
 				worker.Start(args);
@@ -356,7 +356,7 @@ namespace Zongsoft.Plugins
 			foreach(PluginTreeNode child in node.Children)
 				this.StopWorkers(child);
 
-			object target = node.UnwrapValue(ObtainMode.Never, this, null);
+			object target = node.UnwrapValue(ObtainMode.Never);
 
 			if(target is IWorker worker)
 				worker.Stop();

@@ -322,21 +322,27 @@ namespace Zongsoft.Plugins
 			return builder.GetValueType(this);
 		}
 
-		public object GetValue(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
+		public object GetValue(ObtainMode obtainMode, Builders.BuilderSettings settings = null)
 		{
 			switch(obtainMode)
 			{
 				case ObtainMode.Alway:
-					//注意：当获取方式为始终创建新的实例时，必须忽略后续的追加操作（即设置上下文的追加器属性为空），
+					//注意：当获取方式为始终创建新的实例时，必须忽略后续的追加操作，
 					//以避免将重复新建的实例追加到所有者集合中可能导致的集合项键冲突的错误。
-					return this.Build(parameter, build, ctx => ctx.Appender = null);
+
+					if(settings == null)
+						settings = Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreAppending);
+					else
+						settings.SetFlags(Builders.BuilderSettingsFlags.IgnoreAppending);
+
+					return this.Build(settings);
 				case ObtainMode.Auto:
 					if(_value == null)
 					{
 						lock(_syncRoot)
 						{
 							if(_value == null)
-								return this.Build(parameter, build);
+								return this.Build(settings);
 						}
 					}
 					break;
@@ -347,9 +353,9 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 构建方法
-		public object Build(object parameter = null, Action<Builders.BuilderContext> build = null, Action<Builders.BuilderContext> built = null)
+		public object Build(Builders.BuilderSettings settings = null)
 		{
-			return Builders.BuilderManager.Current.Build(this, parameter, build, built);
+			return Builders.BuilderManager.Current.Build(this, settings);
 		}
 		#endregion
 

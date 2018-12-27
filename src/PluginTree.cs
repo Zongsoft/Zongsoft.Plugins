@@ -185,70 +185,6 @@ namespace Zongsoft.Plugins
 		}
 		#endregion
 
-		#region 构建方法
-		/// <summary>
-		/// 生成指定路径下的目标对象。
-		/// </summary>
-		/// <param name="path">指定要构建的路径。</param>
-		/// <returns>返回构建成功的目标，如果指定的路径不存在则返回空(null)。</returns>
-		public object Build(string path)
-		{
-			return this.Build(path, null, null);
-		}
-
-		/// <summary>
-		/// 生成指定路径下的目标对象。
-		/// </summary>
-		/// <param name="path">指定要构建的路径。</param>
-		/// <param name="parameter">调用者需要传递给构建器的参数对象。</param>
-		/// <returns>返回构建成功的目标，如果指定的路径不存在则返回空(null)。</returns>
-		public object Build(string path, object parameter)
-		{
-			return this.Build(path, parameter, null);
-		}
-
-		public object Build(string path, object parameter, Action<Builders.BuilderContext> build)
-		{
-			if(_status == PluginTreeStatus.None)
-				throw new InvalidOperationException();
-
-			PluginTreeNode node = this.Find(path);
-
-			if(node == null)
-				return null;
-
-			return this.Build(node, parameter, build);
-		}
-
-		public object Build(PluginTreeNode node)
-		{
-			return this.Build(node, null, null);
-		}
-
-		public object Build(PluginTreeNode node, object parameter)
-		{
-			return this.Build(node, parameter, null);
-		}
-
-		/// <summary>
-		/// 生成指定插件节点对应的目标对象。
-		/// </summary>
-		/// <param name="node">指定要构建的插件树节点。</param>
-		/// <param name="parameter">调用者需要传递给构建器的参数对象。</param>
-		/// <param name="build">由调用者指定的构建委托，如果为空则使用对应的构建器的构建动作。</param>
-		/// <returns>返回构建成功的目标，如果指定的<paramref name="node"/>类型不是<see cref="PluginTreeNodeType.Builtin"/>则返回节点的<see cref="PluginTreeNode.Value"/>属性值。</returns>
-		public object Build(PluginTreeNode node, object parameter, Action<Builders.BuilderContext> build)
-		{
-			if(node == null)
-				throw new ArgumentNullException("node");
-
-			if(_status != PluginTreeStatus.Loaded)
-				throw new InvalidOperationException();
-
-			return node.Build(parameter, build);
-		}
-		#endregion
-
 		#region 查找方法
 		/// <summary>
 		/// 查找指定路径的插件树节点。
@@ -485,7 +421,7 @@ namespace Zongsoft.Plugins
 				throw new ArgumentException();
 
 			//以永不构建的方式获取当前节点的目标对象
-			var value = node.UnwrapValue(ObtainMode.Never, null);
+			var value = node.UnwrapValue(ObtainMode.Never);
 
 			//将当前节点置空
 			node.Value = null;
@@ -544,7 +480,7 @@ namespace Zongsoft.Plugins
 				{
 					IBuilder builder = node.Plugin.GetBuilder(builtin.BuilderName);
 					if(builder != null)
-						builder.Destroy(Builders.BuilderContext.CreateContext(builder, builtin, this));
+						builder.Destroy(Builders.BuilderContext.CreateContext(builder, builtin));
 
 					plugin.UnregisterBuiltin(builtin);
 					node.Value = null;

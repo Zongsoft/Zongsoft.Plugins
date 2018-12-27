@@ -116,7 +116,7 @@ namespace Zongsoft.Plugins
 
 					//注意：解析所有者节点的目标对象。该操作绝不能激发创建动作，不然将可能导致无限递归调用。
 					if(containerNode != null)
-						_container = containerNode.UnwrapValue(ObtainMode.Never, null);
+						_container = containerNode.UnwrapValue(ObtainMode.Never);
 				}
 
 				return _container;

@@ -110,7 +110,7 @@ namespace Zongsoft.Plugins.Commands
 				output.WriteLine(CommandOutletColor.DarkGray, node.Plugin.Name);
 			}
 
-			var target = node.UnwrapValue(ObtainMode.Never, null);
+			var target = node.UnwrapValue(ObtainMode.Never);
 			if(target != null)
 				output.WriteLine(CommandOutletColor.DarkYellow, "{0}{1}", indent, target.GetType().FullName);
 

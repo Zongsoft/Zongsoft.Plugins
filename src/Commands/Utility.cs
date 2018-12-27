@@ -86,7 +86,7 @@ namespace Zongsoft.Plugins.Commands
 				}
 			}
 
-			object value = node.UnwrapValue(obtainMode, null);
+			object value = node.UnwrapValue(obtainMode);
 			if(value != null)
 			{
 				output.WriteLine();

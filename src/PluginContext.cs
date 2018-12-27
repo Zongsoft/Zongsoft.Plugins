@@ -166,7 +166,7 @@ namespace Zongsoft.Plugins
 			try
 			{
 				//获取指定路径的目标对象
-				object target = node.UnwrapValue(obtainMode, this, null);
+				object target = node.UnwrapValue(obtainMode);
 
 				if(target != null && expression.Members.Length > 0)
 					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);

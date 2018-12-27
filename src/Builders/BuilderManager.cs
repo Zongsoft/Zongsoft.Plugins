@@ -54,14 +54,14 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 公共方法
-		public object Build(Builtin builtin, object parameter, Action<BuilderContext> build, Action<BuilderContext> built)
+		public object Build(Builtin builtin, BuilderSettings settings)
 		{
 			//获取当前构件的构建器对象
 			IBuilder builder = this.GetBuilder(builtin);
 
 			lock(_syncRoot)
 			{
-				return this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter), build, built);
+				return this.BuildCore(BuilderContext.CreateContext(builder, builtin, settings));
 			}
 		}
 		#endregion
@@ -74,7 +74,7 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 私有方法
-		private object BuildCore(IBuilder builder, BuilderContext context, Action<BuilderContext> build, Action<BuilderContext> built)
+		private object BuildCore(BuilderContext context)
 		{
 			object value;
 
@@ -88,26 +88,19 @@ namespace Zongsoft.Plugins.Builders
 				//注意：将当前创建的目标对象保存到调用栈中的操作必须在构建子构件集合之前完成！
 				_stack.Push(new BuildToken(context.Builtin, context.Result));
 
-				if(build != null)
-					build(context);
-				else
-				{
-					var target = builder.Build(context);
+				//调用构建器进行构建目标对象
+				var target = context.Builder.Build(context);
 
-					//如果创建器以两种方式传递过来的目标对象均不为空并且引用不相等，则抛出异常，以确保实现者返回的目标对象是明确唯一的。
-					if(target != null && context.Result != null && object.Equals(target, context.Result) == false)
-						throw new PluginException(string.Format("The builder of '{0}' builtin was faild.", context.Builtin.ToString()));
+				if(context.Result == null)
+					context.Result = target;
 
-					context.Result = context.Result ?? target;
-				}
-
-				//如果要保存构建的目标对象，则将其保存在当前构件对象的Value属性内
-				context.Builtin.Value = context.Value ?? context.Result;
+				//如果构建的目标对象保存在对应的构件(Builtin)的Value属性中
+				context.Builtin.Value = context.Result;
 
 				//如果构建结果不为空并且不取消后续构建操作的话，则继续构建子集
-				if(context.Result != null && !context.Cancel)
+				if((context.Settings == null || !context.Settings.HasFlags(BuilderSettingsFlags.IgnoreChildren)) && context.Result != null && !context.Cancel)
 				{
-					BuildChildren(context.Node, context.Parameter, context.Result, context.Node);
+					BuildChildren(context.Node, context.Settings, context.Depth, context.Result, context.Node);
 				}
 
 				//设置当前构件为构建已完成标志
@@ -120,10 +113,10 @@ namespace Zongsoft.Plugins.Builders
 			}
 
 			//回调构建完成通知方法
-			built?.Invoke(context);
+			context?.Settings?.Builded?.Invoke(context);
 
 			//通知构建器本次构建工作已完成
-			builder.OnBuildComplete(context);
+			context.Builder.OnBuildComplete(context);
 
 			//激发构建完成事件
 			this.OnBuildCompleted(context);
@@ -132,7 +125,7 @@ namespace Zongsoft.Plugins.Builders
 			return context.Result;
 		}
 
-		private void BuildChildren(PluginTreeNode node, object parameter, object owner, PluginTreeNode ownerNode)
+		private void BuildChildren(PluginTreeNode node, BuilderSettings settings, int depth, object owner, PluginTreeNode ownerNode)
 		{
 			if(node == null)
 				return;
@@ -142,19 +135,19 @@ namespace Zongsoft.Plugins.Builders
 				switch(child.NodeType)
 				{
 					case PluginTreeNodeType.Builtin:
-						this.BuildChild((Builtin)child.Value, parameter, owner, ownerNode);
+						this.BuildChild((Builtin)child.Value, settings, depth + 1, owner, ownerNode);
 						break;
 					case PluginTreeNodeType.Empty:
-						this.BuildChildren(child, parameter, owner, ownerNode);
+						this.BuildChildren(child, settings, depth + 1, owner, ownerNode);
 						break;
 					case PluginTreeNodeType.Custom:
-						this.BuildChildren(child, parameter, child.Value, child);
+						this.BuildChildren(child, settings, depth + 1, child.Value, child);
 						break;
 				}
 			}
 		}
 
-		private void BuildChild(Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
+		private void BuildChild(Builtin builtin, BuilderSettings settings, int depth, object owner, PluginTreeNode ownerNode)
 		{
 			//获取当前构件的构建器对象
 			IBuilder builder = this.GetBuilder(builtin);
@@ -162,11 +155,11 @@ namespace Zongsoft.Plugins.Builders
 			if(builtin.IsBuilded)
 			{
 				if(owner != null && builder is IAppender appender)
-					appender.Append(new AppenderContext(builtin.Context, builtin.Value, builtin.Node, owner, ownerNode, AppenderBehavior.Append));
+					appender.Append(new AppenderContext(builtin.Context, builtin.Value, builtin.Node, owner, ownerNode, AppenderBehavior.Appending));
 			}
 			else
 			{
-				this.BuildCore(builder, BuilderContext.CreateContext(builder, builtin, parameter, owner, ownerNode), null, null);
+				this.BuildCore(BuilderContext.CreateContext(builder, builtin, settings, depth, owner, ownerNode));
 			}
 		}
 

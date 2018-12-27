@@ -306,36 +306,10 @@ namespace Zongsoft.Plugins
 			return node;
 		}
 
-		public object Build()
-		{
-			return this.Build(null, null);
-		}
-
-		public object Build(object parameter)
-		{
-			return this.Build(parameter, null);
-		}
-
-		public object Build(object parameter, Action<Builders.BuilderContext> build)
+		public object UnwrapValue(ObtainMode obtainMode, Builders.BuilderSettings settings = null)
 		{
 			if(_nodeType == PluginTreeNodeType.Builtin)
-				return ((Builtin)_value).Build(parameter, build);
-
-			return _value;
-		}
-
-		/// <summary>
-		/// 解构当前节点值，以获取目标对象。
-		/// </summary>
-		/// <param name="obtainMode">构件值的获取方式。</param>
-		/// <param name="parameter">自定义的参数对象。</param>
-		/// <param name="build">指定的自定义构建方法。</param>
-		/// <returns>返回的目标对象或节点值。</returns>
-		/// <remarks>只有当节点类型<see cref="NodeType"/>为构件(<seealso cref="Zongsoft.Plugins.PluginTreeNodeType.Builtin"/>)，返回其对应的Builtin的目标值。如果是<see cref="Zongsoft.Plugins.PluginTreeNodeType.Custom"/>类型则返回节点值本身；如果是空节点类型则返回空(null)。</remarks>
-		public object UnwrapValue(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
-		{
-			if(_nodeType == PluginTreeNodeType.Builtin)
-				return ((Builtin)_value).GetValue(obtainMode, parameter, build);
+				return ((Builtin)_value).GetValue(obtainMode, settings);
 
 			return _value;
 		}

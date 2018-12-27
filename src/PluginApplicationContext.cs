@@ -155,8 +155,10 @@ namespace Zongsoft.Plugins
 
 			if(node.NodeType == PluginTreeNodeType.Builtin)
 			{
-				if(!((Builtin)node.Value).IsBuilded)
-					node.Build();
+				var builtin = (Builtin)node.Value;
+
+				if(!builtin.IsBuilded)
+					builtin.Build();
 
 				return;
 			}

@@ -28,7 +28,7 @@ using System;
 
 namespace Zongsoft.Plugins.Builders
 {
-	public class BuilderContext : MarshalByRefObject
+	public class BuilderContext
 	{
 		#region 同步字段
 		private readonly object _syncRoot;
@@ -37,23 +37,24 @@ namespace Zongsoft.Plugins.Builders
 		#region 成员字段
 		private IBuilder _builder;
 		private IAppender _appender;
+		private int _depth;
 		private bool _cancel;
 		private Builtin _builtin;
-		private object _parameter;
+		private BuilderSettings _settings;
 		private object _result;
-		private object _value;
 		private object _owner;
 		private PluginTreeNode _ownerNode;
 		#endregion
 
 		#region 构造函数
-		private BuilderContext(IBuilder builder, Builtin builtin, object parameter, object owner, PluginTreeNode ownerNode)
+		private BuilderContext(IBuilder builder, Builtin builtin, BuilderSettings settings, int depth, object owner, PluginTreeNode ownerNode)
 		{
 			_builder = builder ?? throw new ArgumentNullException(nameof(builder));
 			_builtin = builtin ?? throw new ArgumentNullException(nameof(builtin));
 			_appender = builder as IAppender;
+			_settings = settings;
 
-			_parameter = parameter;
+			_depth = depth;
 			_owner = owner;
 			_ownerNode = ownerNode;
 
@@ -121,21 +122,13 @@ namespace Zongsoft.Plugins.Builders
 		}
 
 		/// <summary>
-		/// 获取或设置参数对象。
+		/// 获取构建选项参数。
 		/// </summary>
-		/// <remarks>
-		///		<para>系统对属性不做约定，该属性值取决于特定调用者也可能在中途被其他构建器修改，因此建议使用者尽量不要过于依赖该值。</para>
-		///		<para>对构建器实现者的建议：默认的构建动作内部会依次从上至下调用所有子级构件对应的构建动作，在这些层级调用过程中获取该属性值可能只对特定级别的构建器有意义，因此构建器的实现者需要与调用者进行约定，而在某些场合这些约定是难以确保的，因此请谨慎对待该属性值！</para>
-		/// </remarks>
-		public object Parameter
+		public BuilderSettings Settings
 		{
 			get
 			{
-				return _parameter;
-			}
-			set
-			{
-				_parameter = value;
+				return _settings;
 			}
 		}
 
@@ -177,6 +170,17 @@ namespace Zongsoft.Plugins.Builders
 		}
 
 		/// <summary>
+		/// 获取当前构建的深度，如果大于零则表示处于子构件的构建中。
+		/// </summary>
+		public int Depth
+		{
+			get
+			{
+				return _depth;
+			}
+		}
+
+		/// <summary>
 		/// 获取当前节点的所有者对象，即所有者节点对应的目标对象。
 		/// </summary>
 		/// <remarks>
@@ -192,7 +196,7 @@ namespace Zongsoft.Plugins.Builders
 
 					//注意：解析所有者节点的目标对象。该操作绝不能激发创建动作，不然将可能导致无限递归调用。
 					if(ownerNode != null)
-						_owner = ownerNode.UnwrapValue(ObtainMode.Never, _parameter, null);
+						_owner = ownerNode.UnwrapValue(ObtainMode.Never, _settings);
 				}
 
 				return _owner;
@@ -247,31 +251,12 @@ namespace Zongsoft.Plugins.Builders
 				_result = value;
 			}
 		}
-
-		/// <summary>
-		/// 获取或设置由构建器返回的需要保存到对应<see cref="Builtin"/>构件中对象中的<seealso cref="Zongsoft.Plugins.Builtin.Value"/>属性。
-		/// </summary>
-		/// <remarks>
-		///		<para>该属性返回值会被作为对应<see cref="Builtin"/>的子构件对应目标对象的所有者(即上级对象)。</para>
-		///		<para>如果构建器不需要将创建的目标对象保存到<see cref="Builtin"/>构件对象，则可以将该属性值设置为空(null)。</para>
-		/// </remarks>
-		public object Value
-		{
-			get
-			{
-				return _value;
-			}
-			set
-			{
-				_value = value;
-			}
-		}
 		#endregion
 
 		#region 创建方法
-		internal static BuilderContext CreateContext(IBuilder builder, Builtin builtin, object parameter, object owner = null, PluginTreeNode ownerNode = null)
+		internal static BuilderContext CreateContext(IBuilder builder, Builtin builtin, BuilderSettings settings = null, int depth = 0, object owner = null, PluginTreeNode ownerNode = null)
 		{
-			return new BuilderContext(builder, builtin, parameter, owner, ownerNode);
+			return new BuilderContext(builder, builtin, settings, depth, owner, ownerNode);
 		}
 		#endregion
 	}
