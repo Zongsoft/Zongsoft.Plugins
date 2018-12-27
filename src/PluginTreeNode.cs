@@ -339,11 +339,6 @@ namespace Zongsoft.Plugins
 
 			return _value;
 		}
-
-		public T UnwrapValue<T>(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
-		{
-			return Zongsoft.Common.Convert.ConvertValue<T>(this.UnwrapValue(obtainMode, parameter, build));
-		}
 		#endregion
 
 		#region 内部方法

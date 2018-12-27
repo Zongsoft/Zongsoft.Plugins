@@ -531,14 +531,19 @@ namespace Zongsoft.Plugins
 
 			if(builtin.Node != null && builtin.Node.Parent != null)
 			{
-				var node = builtin.Node.Parent;
+				var node = builtin.Node;
 
 				while(node != null)
 				{
-					var nodeValue = node.UnwrapValue(ObtainMode.Auto);
+					var valueType = node.ValueType;
 
-					if(nodeValue != null && nodeValue is Zongsoft.Services.IApplicationModule module)
-						return module.Services ?? builtin.Context.ApplicationContext.Services;
+					if(valueType == null || typeof(Services.IApplicationModule).IsAssignableFrom(valueType))
+					{
+						var value = node.UnwrapValue(ObtainMode.Auto, null, ctx => ctx.Cancel = true);
+
+						if(value != null && value is Zongsoft.Services.IApplicationModule module)
+							return module.Services ?? builtin.Context.ApplicationContext.Services;
+					}
 
 					node = node.Parent;
 				}

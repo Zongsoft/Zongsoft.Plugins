@@ -38,7 +38,7 @@ namespace Zongsoft.Options.Plugins
 		{
 			get
 			{
-				return "OptionConfigurationModule";
+				return nameof(OptionInitializer);
 			}
 		}
 		#endregion

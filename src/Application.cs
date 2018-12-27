@@ -25,8 +25,6 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Zongsoft.Plugins
@@ -94,7 +92,7 @@ namespace Zongsoft.Plugins
 					context.Workbench.Opened += delegate
 					{
 						//激发应用启动完成事件
-						RaiseStarted(args);
+						OnStarted(args);
 					};
 
 					context.Workbench.Closed += delegate
@@ -107,7 +105,7 @@ namespace Zongsoft.Plugins
 				}
 
 				//激发应用启动完成事件
-				RaiseStarted(args);
+				OnStarted(args);
 			}
 			#if !DEBUG
 			catch(Exception ex)
@@ -153,23 +151,6 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 激发事件
-		private static void RaiseStarted(string[] args)
-		{
-			var context = _context;
-
-			if(context == null)
-				return;
-
-			if(Interlocked.CompareExchange(ref _flags, 1, 0) == 0)
-			{
-				//激发“Started”事件
-				OnStarted(args);
-
-				//激发应用上下文对象的“Started”事件
-				context.RaiseStarted(args);
-			}
-		}
-
 		private static void OnExiting(PluginApplicationContext context)
 		{
 			if(context == null)
@@ -191,10 +172,13 @@ namespace Zongsoft.Plugins
 
 		private static void OnStarted(string[] args)
 		{
-			Started?.Invoke(null, EventArgs.Empty);
+			if(Interlocked.CompareExchange(ref _flags, 1, 0) == 0)
+			{
+				Started?.Invoke(null, EventArgs.Empty);
 
-			//激发当前上下文的“Started”事件
-			_context.RaiseStarted(args);
+				//激发当前上下文的“Started”事件
+				_context.RaiseStarted(args);
+			}
 		}
 		#endregion
 
@@ -231,10 +215,10 @@ namespace Zongsoft.Plugins
 			if(context == null)
 				return;
 
-			foreach(var module in context.Modules)
+			foreach(var filter in context.Filters)
 			{
-				if(module != null && module is IDisposable)
-					((IDisposable)module).Dispose();
+				if(filter != null && filter is IDisposable)
+					((IDisposable)filter).Dispose();
 			}
 		}
 

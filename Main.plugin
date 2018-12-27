@@ -45,7 +45,7 @@
 		<!-- 内存队列（范例服务） -->
 		<object name="Queue" minimumGrow="256" type="Zongsoft.Collections.Queue, Zongsoft.CoreLibrary">
 			<object.constructor>
-				<parameter name="capacity" type="int" value="1024" />
+				<parameter name="capacity" type="int" value="512" />
 			</object.constructor>
 
 			<queue.maximumLimit>1024</queue.maximumLimit>

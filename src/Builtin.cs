@@ -316,15 +316,10 @@ namespace Zongsoft.Plugins
 
 			var builder = this.Plugin.GetBuilder(_builderName);
 
-			if(builder != null)
-				return builder.GetValueType(this);
+			if(builder == null)
+				throw new PluginException($"Not found the builder for the '{_builderName}'({this.FullPath}) builtin.");
 
-			return null;
-		}
-
-		public object GetValue(object parameter = null, Action<Builders.BuilderContext> build = null)
-		{
-			return this.GetValue(ObtainMode.Auto, parameter, build);
+			return builder.GetValueType(this);
 		}
 
 		public object GetValue(ObtainMode obtainMode, object parameter = null, Action<Builders.BuilderContext> build = null)
