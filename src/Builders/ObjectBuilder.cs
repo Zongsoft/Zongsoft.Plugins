@@ -227,15 +227,12 @@ namespace Zongsoft.Plugins.Builders
 			//设置输出参数默认值
 			valueType = null;
 
-			var contracts = new List<Type>();
+			//获取容器类型实现的所有接口
+			var interfaces = container.GetType().GetInterfaces();
 
-			foreach(var contract in container.GetType().GetInterfaces())
-			{
-				if(contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(IDictionary<,>))
-					contracts.Insert(0, contract);
-				else if(contract == typeof(IDictionary))
-					contracts.Add(contract);
-			}
+			//确保泛型字典接口在非泛型字典接口之前
+			var contracts = interfaces.Where(p => p.IsGenericType && p.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+				.Concat(interfaces.Where(p => p == typeof(IDictionary)));
 
 			foreach(var contract in contracts)
 			{
@@ -271,15 +268,12 @@ namespace Zongsoft.Plugins.Builders
 			//设置输出参数默认值
 			valueType = null;
 
-			var contracts = new List<Type>();
+			//获取容器类型实现的所有接口
+			var interfaces = container.GetType().GetInterfaces();
 
-			foreach(var contract in container.GetType().GetInterfaces())
-			{
-				if(contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(ICollection<>))
-					contracts.Insert(0, contract);
-				else if(!contract.IsGenericType && contract == typeof(ICollection))
-					contracts.Add(contract);
-			}
+			//确保泛型集合接口在非泛型集合接口之前
+			var contracts = interfaces.Where(p => p.IsGenericType && p.GetGenericTypeDefinition() == typeof(ICollection<>))
+				.Concat(interfaces.Where(p => p == typeof(ICollection)));
 
 			foreach(var contract in contracts)
 			{
