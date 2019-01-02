@@ -106,48 +106,31 @@ namespace Zongsoft.Plugins.Builders
 				return false;
 
 			Type containerType = container.GetType();
-			var isAdded = false;
 
 			//第一步(a)：确认容器对象实现的各种泛型字典接口
-			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<,>), containerType, genericType =>
+			var add = GetDictionaryAddMethod(container, child.GetType(), out var valueType);
+
+			if(add != null && Common.Convert.TryConvertValue(child, valueType, out var value))
 			{
-				var containerElementTypes = genericType.GetGenericArguments();
-
-				if(containerElementTypes[0] == typeof(string) && Common.Convert.TryConvertValue(child, containerElementTypes[1], out var item))
-				{
-					//创建容器集合Add方法委托，因为该方法可能是显式实现也可能不是，但优先采用显式实现版本
-					var add = Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(containerElementTypes), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
-					          Delegate.CreateDelegate(typeof(Action<,>).MakeGenericType(containerElementTypes), container, "Add", false, false);
-
-					add.DynamicInvoke(key, item);
-					return true;
-				}
-
-				return null;
-			});
-
-			if(isAdded)
+				add.DynamicInvoke(key, value);
 				return true;
+			}
 
 			//第一步(b)：确认容器对象实现的各种泛型集合接口
-			isAdded = Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), containerType, genericType =>
+			add = GetCollectionAddMethod(container, child.GetType(), out valueType);
+
+			if(add != null)
 			{
-				var containerElementTypes = genericType.GetGenericArguments();
-
-				//创建容器集合Add方法委托，因为该方法可能是显式实现也可能不是，但优先采用显式实现版本
-				var add = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(containerElementTypes), container, Common.TypeExtension.GetExplicitImplementationName(genericType, "Add"), false, false) ??
-				          Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(containerElementTypes), container, "Add", false, false);
-
 				//获取子元素的元素类型（如果子元素不是一个可遍历对象，则返回的元素类型为空）
 				var childElementType = Common.TypeExtension.GetElementType(child.GetType());
 
-				if(childElementType != null && containerElementTypes[0].IsAssignableFrom(childElementType))
+				if(childElementType != null && valueType.IsAssignableFrom(childElementType))
 				{
 					int count = 0;
 
 					foreach(var entry in (IEnumerable)child)
 					{
-						if(Common.Convert.TryConvertValue(entry, containerElementTypes[0], out var item))
+						if(Common.Convert.TryConvertValue(entry, valueType, out var item))
 						{
 							add.DynamicInvoke(item);
 							count++;
@@ -157,22 +140,17 @@ namespace Zongsoft.Plugins.Builders
 					if(count > 0)
 						return true;
 					else
-						return null;
+						return false;
 				}
 				else
 				{
-					if(Common.Convert.TryConvertValue(child, containerElementTypes[0], out var item))
+					if(Common.Convert.TryConvertValue(child, valueType, out var item))
 					{
 						add.DynamicInvoke(item);
 						return true;
 					}
 				}
-
-				return null;
-			});
-
-			if(isAdded)
-				return true;
+			}
 
 			//第二步(a)：非泛型字典容器处理
 			if(typeof(IDictionary).IsAssignableFrom(containerType))
@@ -242,6 +220,93 @@ namespace Zongsoft.Plugins.Builders
 
 			//如果上述所有步骤均未完成则返回失败
 			return false;
+		}
+
+		private Delegate GetDictionaryAddMethod(object container, Type childType, out Type valueType)
+		{
+			//设置输出参数默认值
+			valueType = null;
+
+			var contracts = new List<Type>();
+
+			foreach(var contract in container.GetType().GetInterfaces())
+			{
+				if(contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+					contracts.Insert(0, contract);
+				else if(contract == typeof(IDictionary))
+					contracts.Add(contract);
+			}
+
+			foreach(var contract in contracts)
+			{
+				MethodInfo method = null;
+				var mapping = container.GetType().GetInterfaceMap(contract);
+
+				for(int i = 0; i < mapping.InterfaceMethods.Length; i++)
+				{
+					if(mapping.InterfaceMethods[i].Name == "Add")
+					{
+						var parameters = mapping.InterfaceMethods[i].GetParameters();
+
+						if(parameters.Length == 2 && (parameters[0].ParameterType == typeof(string) || parameters[0].ParameterType == typeof(object)) &&
+						   parameters[1].ParameterType.IsAssignableFrom(childType))
+							method = mapping.TargetMethods[i];
+
+						break;
+					}
+				}
+
+				if(method != null)
+				{
+					valueType = method.GetParameters()[1].ParameterType;
+					return method.CreateDelegate(typeof(Action<,>).MakeGenericType(method.GetParameters()[0].ParameterType, valueType), container);
+				}
+			}
+
+			return null;
+		}
+
+		private Delegate GetCollectionAddMethod(object container, Type childType, out Type valueType)
+		{
+			//设置输出参数默认值
+			valueType = null;
+
+			var contracts = new List<Type>();
+
+			foreach(var contract in container.GetType().GetInterfaces())
+			{
+				if(contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(ICollection<>))
+					contracts.Insert(0, contract);
+				else if(!contract.IsGenericType && contract == typeof(ICollection))
+					contracts.Add(contract);
+			}
+
+			foreach(var contract in contracts)
+			{
+				MethodInfo method = null;
+				var mapping = container.GetType().GetInterfaceMap(contract);
+
+				for(int i = 0; i < mapping.InterfaceMethods.Length; i++)
+				{
+					if(mapping.InterfaceMethods[i].Name == "Add")
+					{
+						var parameters = mapping.InterfaceMethods[i].GetParameters();
+
+						if(parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(childType))
+							method = mapping.TargetMethods[i];
+
+						break;
+					}
+				}
+
+				if(method != null)
+				{
+					valueType = method.GetParameters()[0].ParameterType;
+					return method.CreateDelegate(typeof(Action<>).MakeGenericType(valueType), container);
+				}
+			}
+
+			return null;
 		}
 		#endregion
 	}
