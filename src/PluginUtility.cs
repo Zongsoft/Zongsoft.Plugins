@@ -405,6 +405,18 @@ namespace Zongsoft.Plugins
 						return true;
 					}
 
+					if(typeof(Zongsoft.Services.IApplicationContext).IsAssignableFrom(parameterType))
+					{
+						parameterValue = builtin.Context.ApplicationContext;
+						return true;
+					}
+
+					if(typeof(Zongsoft.Services.IApplicationModule).IsAssignableFrom(parameterType))
+					{
+						parameterValue = FindApplicationModule(builtin);
+						return true;
+					}
+
 					return ObtainParameter(builtin.Plugin, parameterType, parameterName, out parameterValue);
 				});
 
@@ -524,30 +536,40 @@ namespace Zongsoft.Plugins
 		}
 		#endregion
 
+		internal static Zongsoft.Services.IApplicationModule FindApplicationModule(Builtin builtin)
+		{
+			if(builtin == null || builtin.Node == null || builtin.Node.Parent == null)
+				return null;
+
+			var node = builtin.Node;
+
+			while(node != null)
+			{
+				var valueType = node.ValueType;
+
+				if(valueType == null || typeof(Services.IApplicationModule).IsAssignableFrom(valueType))
+				{
+					var value = node.UnwrapValue(ObtainMode.Auto, Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreChildren));
+
+					if(value != null && value is Zongsoft.Services.IApplicationModule module)
+						return module;
+				}
+
+				node = node.Parent;
+			}
+
+			return null;
+		}
+
 		internal static Zongsoft.Services.IServiceProvider FindServiceProvider(Builtin builtin)
 		{
 			if(builtin == null)
 				return null;
 
-			if(builtin.Node != null && builtin.Node.Parent != null)
-			{
-				var node = builtin.Node;
+			var module = FindApplicationModule(builtin);
 
-				while(node != null)
-				{
-					var valueType = node.ValueType;
-
-					if(valueType == null || typeof(Services.IApplicationModule).IsAssignableFrom(valueType))
-					{
-						var value = node.UnwrapValue(ObtainMode.Auto, Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreChildren));
-
-						if(value != null && value is Zongsoft.Services.IApplicationModule module)
-							return module.Services ?? builtin.Context.ApplicationContext.Services;
-					}
-
-					node = node.Parent;
-				}
-			}
+			if(module != null && module.Services != null)
+				return module.Services;
 
 			if(builtin.Node != null && builtin.Node.Parent != null)
 				return Services.ServiceProviderFactory.Instance.GetProvider(builtin.Node.Parent.Name) ?? builtin.Context.ApplicationContext.Services;
