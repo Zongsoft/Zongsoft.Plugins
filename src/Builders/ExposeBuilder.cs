@@ -30,32 +30,23 @@ using System.Collections.Generic;
 namespace Zongsoft.Plugins.Builders
 {
 	/// <summary>
-	/// 构件链接创建器。
+	/// 构件暴露创建器。
 	/// </summary>
 	/// <remarks>
-	///		<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它不始终不会激发对子节点的构建。</para>
+	/// 	<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它不会执行追加操作。</para>
 	/// </remarks>
-	[Obsolete]
-	public class LinkBuilder : ObjectBuilder
+	public class ExposeBuilder : ObjectBuilder
 	{
-		public override Type GetValueType(Builtin builtin)
-		{
-			if(!builtin.Properties.TryGet("ref", out var property))
-				throw new PluginException(string.Format("Missing 'ref' property in '{0}' builtin.", builtin));
-
-			var refNode = builtin.Node.Find(property.RawValue);
-			return refNode == null ? null : refNode.ValueType;
-		}
-
 		public override object Build(BuilderContext context)
 		{
-			if(!context.Builtin.Properties.TryGet("ref", out var property))
-				throw new PluginException(string.Format("Missing 'ref' property in '{0}' builtin.", context.Builtin));
+			//忽略追加操作
+			context.Appender = null;
 
-			//阻止构建下级节点
-			context.Cancel = true;
+			if(context.Settings != null)
+				context.Settings.SetFlags(BuilderSettingsFlags.IgnoreAppending);
 
-			return context.PluginContext.ResolvePath(property.RawValue, context.Node, ObtainMode.Auto);
+			//调用基类同名方法
+			return base.Build(context);
 		}
 	}
 }

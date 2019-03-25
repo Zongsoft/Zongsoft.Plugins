@@ -33,7 +33,7 @@ namespace Zongsoft.Plugins.Builders
 	/// 对象懒惰式创建器。
 	/// </summary>
 	/// <remarks>
-	///		<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它不始终不会激发对子节点的构建。</para>
+	/// 	<para>该构建器区别于<seealso cref="ObjectBuilder"/>的主要特征在于它始终不会激发对子节点的构建。</para>
 	/// </remarks>
 	public class LazyBuilder : ObjectBuilder
 	{

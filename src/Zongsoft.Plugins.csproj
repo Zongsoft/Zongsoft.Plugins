@@ -61,7 +61,7 @@
     <Compile Include="Builders\BuilderSettings.cs" />
     <Compile Include="Builders\BuilderSettingsFlags.cs" />
     <Compile Include="Builders\LazyBuilder.cs" />
-    <Compile Include="Builders\LinkBuilder.cs" />
+    <Compile Include="Builders\ExposeBuilder.cs" />
     <Compile Include="BuiltinBehavior.cs" />
     <Compile Include="BuiltinBehaviorCollection.cs" />
     <Compile Include="Collections\HasCollectionPredication.cs" />

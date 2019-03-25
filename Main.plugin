@@ -15,6 +15,7 @@
 
 	<builders>
 		<builder name="lazy" type="Zongsoft.Plugins.Builders.LazyBuilder, Zongsoft.Plugins"/>
+		<builder name="expose" type="Zongsoft.Plugins.Builders.ExposeBuilder, Zongsoft.Plugins"/>
 		<builder name="object" type="Zongsoft.Plugins.Builders.ObjectBuilder, Zongsoft.Plugins"/>
 		<builder name="component" type="Zongsoft.ComponentModel.Plugins.ComponentBuilder, Zongsoft.Plugins" />
 	</builders>
