@@ -100,7 +100,7 @@ namespace Zongsoft.Plugins.Builders
 				//如果构建结果不为空并且不取消后续构建操作的话，则继续构建子集
 				if((context.Settings == null || !context.Settings.HasFlags(BuilderSettingsFlags.IgnoreChildren)) && context.Result != null && !context.Cancel)
 				{
-					BuildChildren(context.Node, context.Settings, context.Depth, context.Result, context.Node);
+					BuildChildren(context.Node, context.Depth, context.Result, context.Node);
 				}
 
 				//设置当前构件为构建已完成标志
@@ -125,7 +125,7 @@ namespace Zongsoft.Plugins.Builders
 			return context.Result;
 		}
 
-		private void BuildChildren(PluginTreeNode node, BuilderSettings settings, int depth, object owner, PluginTreeNode ownerNode)
+		private void BuildChildren(PluginTreeNode node, int depth, object owner, PluginTreeNode ownerNode)
 		{
 			if(node == null)
 				return;
@@ -135,19 +135,19 @@ namespace Zongsoft.Plugins.Builders
 				switch(child.NodeType)
 				{
 					case PluginTreeNodeType.Builtin:
-						this.BuildChild((Builtin)child.Value, settings, depth + 1, owner, ownerNode);
+						this.BuildChild((Builtin)child.Value, depth + 1, owner, ownerNode);
 						break;
 					case PluginTreeNodeType.Empty:
-						this.BuildChildren(child, settings, depth + 1, owner, ownerNode);
+						this.BuildChildren(child, depth + 1, owner, ownerNode);
 						break;
 					case PluginTreeNodeType.Custom:
-						this.BuildChildren(child, settings, depth + 1, child.Value, child);
+						this.BuildChildren(child, depth + 1, child.Value, child);
 						break;
 				}
 			}
 		}
 
-		private void BuildChild(Builtin builtin, BuilderSettings settings, int depth, object owner, PluginTreeNode ownerNode)
+		private void BuildChild(Builtin builtin, int depth, object owner, PluginTreeNode ownerNode)
 		{
 			//获取当前构件的构建器对象
 			IBuilder builder = this.GetBuilder(builtin);
@@ -159,7 +159,7 @@ namespace Zongsoft.Plugins.Builders
 			}
 			else
 			{
-				this.BuildCore(BuilderContext.CreateContext(builder, builtin, settings, depth, owner, ownerNode));
+				this.BuildCore(BuilderContext.CreateContext(builder, builtin, null, depth, owner, ownerNode));
 			}
 		}
 

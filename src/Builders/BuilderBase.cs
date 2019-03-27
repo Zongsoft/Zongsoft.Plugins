@@ -88,7 +88,7 @@ namespace Zongsoft.Plugins.Builders
 		/// <returns>创建成功后的目标对象。</returns>
 		public virtual object Build(BuilderContext context)
 		{
-			return PluginUtility.BuildBuiltin(context.Builtin, this.IgnoredProperties);
+			return PluginUtility.BuildBuiltin(context.Builtin, context.Settings, this.IgnoredProperties);
 		}
 
 		public virtual void Destroy(BuilderContext context)

@@ -143,16 +143,10 @@ namespace Zongsoft.Plugins
 		public object ResolvePath(string pathText)
 		{
 			ObtainMode mode;
-			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), this.PluginTree.RootNode, mode);
+			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), this.PluginTree.RootNode, mode, null);
 		}
 
-		internal object ResolvePath(string pathText, PluginTreeNode origin)
-		{
-			ObtainMode mode;
-			return this.ResolvePath(PluginPath.PreparePathText(pathText, out mode), origin, mode);
-		}
-
-		internal object ResolvePath(string pathText, PluginTreeNode origin, ObtainMode obtainMode)
+		internal object ResolvePath(string pathText, PluginTreeNode origin, ObtainMode obtainMode, Type resultType)
 		{
 			if(string.IsNullOrWhiteSpace(pathText))
 				throw new ArgumentNullException(nameof(pathText));
@@ -166,7 +160,7 @@ namespace Zongsoft.Plugins
 			try
 			{
 				//获取指定路径的目标对象
-				object target = node.UnwrapValue(obtainMode);
+				object target = node.UnwrapValue(obtainMode, resultType == null ? null : new Builders.BuilderSettings(resultType));
 
 				if(target != null && expression.Members.Length > 0)
 					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);

@@ -38,23 +38,18 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 构造函数
-		public BuilderSettings(object parameter, Action<BuilderContext> builded = null)
+		public BuilderSettings(Type valueType, Action<BuilderContext> builded = null)
 		{
-			this.Parameter = parameter;
-			this.Builded = builded;
-		}
-
-		public BuilderSettings(Action<BuilderContext> builded = null)
-		{
+			this.ValueType = valueType;
 			this.Builded = builded;
 		}
 		#endregion
 
 		#region 公共属性
 		/// <summary>
-		/// 获取或设置构建的自定义参数。
+		/// 获取或设置构建的结果类型。
 		/// </summary>
-		public object Parameter
+		public Type ValueType
 		{
 			get; set;
 		}
@@ -90,9 +85,9 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 静态方法
-		public static BuilderSettings Ignores(BuilderSettingsFlags flags, object parameter = null)
+		public static BuilderSettings Ignores(BuilderSettingsFlags flags)
 		{
-			return new BuilderSettings(parameter) { Flags = flags };
+			return new BuilderSettings(null) { Flags = flags };
 		}
 		#endregion
 	}

@@ -82,11 +82,11 @@ namespace Zongsoft.Plugins
 			return null;
 		}
 
-		public bool TryGetValue(string name, out object value)
+		public bool TryGetValue(string name, Type valueType, out object value)
 		{
 			if(this.TryGetProperty(name, out var property))
 			{
-				value = property.Value;
+				value = property.GetValue(valueType);
 				return true;
 			}
 

@@ -162,7 +162,7 @@ namespace Zongsoft.Plugins
 			if(_valueNode == null)
 				return PluginUtility.ResolveValue(_owner, _rawValue, _name, valueType, defaultValue);
 
-			var result = _valueNode.UnwrapValue(ObtainMode.Auto, new Builders.BuilderSettings(_owner));
+			var result = _valueNode.UnwrapValue(ObtainMode.Auto, new Builders.BuilderSettings(valueType));
 
 			if(valueType != null)
 				result = Zongsoft.Common.Convert.ConvertValue(result, valueType, defaultValue);

@@ -67,7 +67,7 @@ namespace Zongsoft.Plugins.Parsers
 			if(string.IsNullOrWhiteSpace(text))
 				throw new PluginException($"Missing argument of the path parser.");
 
-			return context.PluginContext.ResolvePath(text, context.Node, mode);
+			return context.PluginContext.ResolvePath(text, context.Node, mode, context.MemberType);
 		}
 		#endregion
 	}

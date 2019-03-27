@@ -54,10 +54,11 @@ namespace Zongsoft.Plugins.Builders
 			{
 				//尝试获取value属性值的类型
 				if(builtin.Properties.TryGet("value", out var property) && Parsers.Parser.CanParse(property.RawValue))
-					return Parsers.Parser.GetValueType(property.RawValue, builtin);
+					type = Parsers.Parser.GetValueType(property.RawValue, builtin);
 
-				//返回所有者元素类型（如果所有者如果是一个泛型集合的话，否则返回空）
-				return PluginUtility.GetOwnerElementType(builtin.Node);
+				//获取所有者元素类型（如果所有者如果是一个泛型集合的话，否则返回空）
+				if(type == null)
+					type = PluginUtility.GetOwnerElementType(builtin.Node);
 			}
 
 			return type;
@@ -70,8 +71,11 @@ namespace Zongsoft.Plugins.Builders
 				return base.Build(context);
 
 			//如果定义了value属性，则采用该属性值作为构建结果
-			if(context.Builtin.Properties.TryGetValue("value", out var result) && result != null)
+			if(context.Builtin.Properties.TryGetValue("value", this.GetValueType(context.Builtin), out var result))
 			{
+				if(result == null)
+					return null;
+
 				//必须将value自身作为忽略属性项
 				var ignoredProperties = this.IgnoredProperties == null ?
 					new HashSet<string>(new[] { "value" }, StringComparer.OrdinalIgnoreCase) :
@@ -80,7 +84,6 @@ namespace Zongsoft.Plugins.Builders
 				//更新构件属性到目标对象的属性中
 				PluginUtility.UpdateProperties(result, context.Builtin, ignoredProperties);
 
-				//你会value属性值
 				return result;
 			}
 
