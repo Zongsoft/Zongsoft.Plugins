@@ -238,12 +238,27 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		#region 构建构件
-		public static object BuildBuiltin(Builtin builtin, IEnumerable<string> ignoredProperties = null)
+		public static object BuildBuiltin(Builtin builtin, Builders.BuilderSettings settings, IEnumerable<string> ignoredProperties)
 		{
 			if(builtin == null)
-				throw new ArgumentNullException("builtin");
+				throw new ArgumentNullException(nameof(builtin));
 
-			var result = PluginUtility.BuildType(builtin);
+			object result = null;
+
+			if(builtin.BuiltinType != null)
+			{
+				result = BuildType(builtin.BuiltinType);
+			}
+			else
+			{
+				//获取所有者元素的类型，如果所有者不是泛型集合则返回空
+				var type = GetOwnerElementType(builtin.Node) ?? settings?.ValueType;
+
+				if(type == null)
+					throw new PluginException($"Unable to determine the target type of the '{builtin.ToString()}' builtin.");
+
+				result = BuildType(type, builtin);
+			}
 
 			//设置更新目标对象的属性集
 			if(result != null)
@@ -302,37 +317,10 @@ namespace Zongsoft.Plugins
 			}
 		}
 
-		internal static object BuildType(Builtin builtin)
-		{
-			if(builtin == null)
-				throw new ArgumentNullException("builtin");
-
-			if(builtin.BuiltinType != null)
-				return BuildType(builtin.BuiltinType);
-
-			string typeName = builtin.Properties.GetValue<string>("type");
-
-			if(string.IsNullOrWhiteSpace(typeName))
-			{
-				//获取所有者元素的类型，如果所有者不是泛型集合则返回空
-				var type = GetOwnerElementType(builtin.Node);
-
-				if(type == null)
-					return null;
-
-				return BuildType(type, builtin);
-			}
-			else
-				return BuildType(typeName, builtin);
-		}
-
 		internal static object BuildType(BuiltinType builtinType)
 		{
 			if(builtinType == null)
-				throw new ArgumentNullException("builtinType");
-
-			if(string.IsNullOrEmpty(builtinType.TypeName))
-				return null;
+				throw new ArgumentNullException(nameof(builtinType));
 
 			object target = null;
 
@@ -437,10 +425,13 @@ namespace Zongsoft.Plugins
 		internal static object BuildType(Type type, ObtainParameterCallback obtainParameter)
 		{
 			if(type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 
 			if(obtainParameter == null)
-				throw new ArgumentNullException("obtainParameter");
+				throw new ArgumentNullException(nameof(obtainParameter));
+
+			if(type.IsInterface || type.IsAbstract)
+				throw new ArgumentException($"Unable to create an instance of the specified '{type.FullName}' type because it is an interface or an abstract class.");
 
 			ConstructorInfo[] constructors = type.GetConstructors();
 
