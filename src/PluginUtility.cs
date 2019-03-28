@@ -252,7 +252,7 @@ namespace Zongsoft.Plugins
 			else
 			{
 				//获取所有者元素的类型，如果所有者不是泛型集合则返回空
-				var type = GetOwnerElementType(builtin.Node) ?? settings?.ValueType;
+				var type = GetOwnerElementType(builtin.Node) ?? settings?.TargetType;
 
 				if(type == null)
 					throw new PluginException($"Unable to determine the target type of the '{builtin.ToString()}' builtin.");
@@ -576,7 +576,7 @@ namespace Zongsoft.Plugins
 		internal static object ResolveValue(PluginElement element, string text, string memberName, Type memberType, object defaultValue)
 		{
 			if(element == null)
-				throw new ArgumentNullException("element");
+				throw new ArgumentNullException(nameof(element));
 
 			if(string.IsNullOrWhiteSpace(text))
 				return Zongsoft.Common.Convert.ConvertValue(text, memberType, defaultValue);
@@ -591,7 +591,7 @@ namespace Zongsoft.Plugins
 				else if(element is PluginTreeNode)
 					result = Parsers.Parser.Parse(text, (PluginTreeNode)element, memberName, memberType);
 				else
-					throw new ArgumentException(string.Format("Can not support the '{0}' element type.", element.GetType()));
+					throw new NotSupportedException(string.Format("Can not support the '{0}' element type.", element.GetType()));
 			}
 
 			//对最后的结果进行类型转换，如果指定的类型为空，该转换操作不会执行任何动作

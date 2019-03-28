@@ -38,9 +38,9 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 构造函数
-		public BuilderSettings(Type valueType, Action<BuilderContext> builded = null)
+		public BuilderSettings(Type targetType, Action<BuilderContext> builded = null)
 		{
-			this.ValueType = valueType;
+			this.TargetType = targetType;
 			this.Builded = builded;
 		}
 		#endregion
@@ -49,7 +49,7 @@ namespace Zongsoft.Plugins.Builders
 		/// <summary>
 		/// 获取或设置构建的结果类型。
 		/// </summary>
-		public Type ValueType
+		public Type TargetType
 		{
 			get; set;
 		}

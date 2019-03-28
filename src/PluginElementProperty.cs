@@ -47,32 +47,23 @@ namespace Zongsoft.Plugins
 		#region 构造函数
 		internal protected PluginElementProperty(PluginElement owner, string name, string rawValue)
 		{
-			if(owner == null)
-				throw new ArgumentNullException(nameof(owner));
-
 			if(string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException(nameof(name));
 
-			_owner = owner;
 			_name = name.Trim();
+			_owner = owner ?? throw new ArgumentNullException(nameof(owner));
 			_rawValue = rawValue;
 			_syncRoot = new object();
 		}
 
 		internal protected PluginElementProperty(PluginElement owner, string name, PluginTreeNode valueNode)
 		{
-			if(owner == null)
-				throw new ArgumentNullException(nameof(owner));
-
 			if(string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException(nameof(name));
 
-			if(valueNode == null)
-				throw new ArgumentNullException(nameof(valueNode));
-
-			_owner = owner;
 			_name = name.Trim();
-			_valueNode = valueNode;
+			_owner = owner ?? throw new ArgumentNullException(nameof(owner));
+			_valueNode = valueNode ?? throw new ArgumentNullException(nameof(valueNode));
 			_rawValue = valueNode.FullPath;
 			_syncRoot = new object();
 		}
@@ -123,10 +114,7 @@ namespace Zongsoft.Plugins
 			}
 			internal set
 			{
-				if(value == null)
-					throw new ArgumentNullException();
-
-				_owner = value;
+				_owner = value ?? throw new ArgumentNullException();
 			}
 		}
 

@@ -37,18 +37,12 @@ namespace Zongsoft.Plugins
 		#region 构造函数
 		internal PluginExtendedProperty(PluginElement owner, string name, string rawValue, Plugin plugin) : base(owner, name, rawValue)
 		{
-			if(plugin == null)
-				throw new ArgumentNullException(nameof(plugin));
-
-			_plugin = plugin;
+			_plugin = plugin ?? throw new ArgumentNullException(nameof(plugin));
 		}
 
 		internal PluginExtendedProperty(PluginElement owner, string name, PluginTreeNode valueNode, Plugin plugin) : base(owner, name, valueNode)
 		{
-			if(plugin == null)
-				throw new ArgumentNullException(nameof(plugin));
-
-			_plugin = plugin;
+			_plugin = plugin ?? throw new ArgumentNullException(nameof(plugin));
 		}
 		#endregion
 

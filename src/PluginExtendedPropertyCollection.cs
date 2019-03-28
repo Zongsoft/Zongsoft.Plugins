@@ -114,7 +114,7 @@ namespace Zongsoft.Plugins
 			else if(value is string)
 				property = new PluginExtendedProperty(_owner, name, (string)value, plugin ?? _owner.Plugin);
 			else
-				throw new ArgumentException("Invalid value argument.");
+				throw new PluginException("Invalid value of the plugin extended property.");
 
 			this.SetItem(name, property);
 
