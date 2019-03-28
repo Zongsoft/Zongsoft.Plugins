@@ -71,20 +71,29 @@ namespace Zongsoft.Plugins.Builders
 				return base.Build(context);
 
 			//如果定义了value属性，则采用该属性值作为构建结果
-			if(context.Builtin.Properties.TryGetValue("value", this.GetValueType(context.Builtin), out var result))
+			if(context.Builtin.Properties.TryGet("value", out var property))
 			{
-				if(result == null)
-					return null;
+				var targetType = this.GetValueType(context.Builtin);
 
-				//必须将value自身作为忽略属性项
-				var ignoredProperties = this.IgnoredProperties == null ?
-					new HashSet<string>(new[] { "value" }, StringComparer.OrdinalIgnoreCase) :
-					new HashSet<string>(this.IgnoredProperties.Concat(new[] { "value" }), StringComparer.OrdinalIgnoreCase);
+				if(Parsers.Parser.CanParse(property.RawValue))
+				{
+					var result = Parsers.Parser.Parse(property.RawValue, context.Builtin, "value", targetType);
 
-				//更新构件属性到目标对象的属性中
-				PluginUtility.UpdateProperties(result, context.Builtin, ignoredProperties);
+					if(result != null)
+					{
+						//必须将value自身作为忽略属性项
+						var ignoredProperties = this.IgnoredProperties == null ?
+							new HashSet<string>(new[] { "value" }, StringComparer.OrdinalIgnoreCase) :
+							new HashSet<string>(this.IgnoredProperties.Concat(new[] { "value" }), StringComparer.OrdinalIgnoreCase);
 
-				return result;
+						//更新构件属性到目标对象的属性中
+						PluginUtility.UpdateProperties(result, context.Builtin, ignoredProperties);
+					}
+
+					return result;
+				}
+
+				return property.RawValue;
 			}
 
 			//调用基类同名方法
@@ -119,14 +128,14 @@ namespace Zongsoft.Plugins.Builders
 				return true;
 			}
 
+			//获取子元素的元素类型（如果子元素不是一个可遍历对象，则返回的元素类型为空）
+			var childElementType = Common.TypeExtension.GetElementType(child.GetType());
+
 			//第一步(b)：确认容器对象实现的各种泛型集合接口
-			add = GetCollectionAddMethod(container, child.GetType(), out valueType);
+			add = GetCollectionAddMethod(container, childElementType ?? child.GetType(), out valueType);
 
 			if(add != null)
 			{
-				//获取子元素的元素类型（如果子元素不是一个可遍历对象，则返回的元素类型为空）
-				var childElementType = Common.TypeExtension.GetElementType(child.GetType());
-
 				if(childElementType != null && valueType.IsAssignableFrom(childElementType))
 				{
 					int count = 0;
@@ -276,7 +285,7 @@ namespace Zongsoft.Plugins.Builders
 
 			//确保泛型集合接口在非泛型集合接口之前
 			var contracts = interfaces.Where(p => p.IsGenericType && p.GetGenericTypeDefinition() == typeof(ICollection<>))
-				.Concat(interfaces.Where(p => p == typeof(ICollection)));
+				.Concat(interfaces.Where(p => p == typeof(IList)));
 
 			foreach(var contract in contracts)
 			{
