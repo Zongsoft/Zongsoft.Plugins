@@ -128,11 +128,18 @@ namespace Zongsoft.Plugins.Builders
 				return true;
 			}
 
-			//获取子元素的元素类型（如果子元素不是一个可遍历对象，则返回的元素类型为空）
+			//获取元素类型（如果元素所有者不是一个可遍历对象，则返回的元素类型为空）
 			var childElementType = Common.TypeExtension.GetElementType(child.GetType());
+			var containerElementType = Common.TypeExtension.GetElementType(containerType);
 
 			//第一步(b)：确认容器对象实现的各种泛型集合接口
-			add = GetCollectionAddMethod(container, childElementType ?? child.GetType(), out valueType);
+			if(containerElementType != null)
+			{
+				if(containerElementType.IsAssignableFrom(child.GetType()))
+					add = GetCollectionAddMethod(container, child.GetType(), out valueType);
+				else if(childElementType != null)
+					add = GetCollectionAddMethod(container, childElementType, out valueType);
+			}
 
 			if(add != null)
 			{
@@ -308,7 +315,12 @@ namespace Zongsoft.Plugins.Builders
 				if(method != null)
 				{
 					valueType = method.GetParameters()[0].ParameterType;
-					return method.CreateDelegate(typeof(Action<>).MakeGenericType(valueType), container);
+
+					//注意：IList接口的Add方法有返回值(int)。
+					if(method.ReturnType == null || method.ReturnType == typeof(void))
+						return method.CreateDelegate(typeof(Action<>).MakeGenericType(valueType), container);
+					else
+						return method.CreateDelegate(typeof(Func<,>).MakeGenericType(valueType, method.ReturnType), container);
 				}
 			}
 
