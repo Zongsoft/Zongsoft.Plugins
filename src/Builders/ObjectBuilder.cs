@@ -73,11 +73,9 @@ namespace Zongsoft.Plugins.Builders
 			//如果定义了value属性，则采用该属性值作为构建结果
 			if(context.Builtin.Properties.TryGet("value", out var property))
 			{
-				var targetType = this.GetValueType(context.Builtin);
-
 				if(Parsers.Parser.CanParse(property.RawValue))
 				{
-					var result = Parsers.Parser.Parse(property.RawValue, context.Builtin, "value", targetType);
+					var result = Parsers.Parser.Parse(property.RawValue, context.Builtin, "value", this.GetValueType(context.Builtin));
 
 					if(result != null)
 					{
