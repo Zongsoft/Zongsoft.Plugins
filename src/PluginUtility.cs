@@ -697,7 +697,11 @@ namespace Zongsoft.Plugins
 				return;
 
 			//查找指定目标对象需要注入的属性和字段集(支持对非公共成员的注入)
-			var members = target.GetType().FindMembers(MemberTypes.Field | MemberTypes.Property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, (m, t) => m.GetCustomAttribute((Type)t, true) != null, typeof(Zongsoft.Services.ServiceDependencyAttribute));
+			var members = target.GetType()
+			                    .FindMembers(MemberTypes.Field | MemberTypes.Property,
+			                    	BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+			                    	(m, t) => m.GetCustomAttribute((Type)t, true) != null,
+			                    	typeof(Zongsoft.Services.ServiceDependencyAttribute));
 
 			if(members == null || members.Length < 1)
 				return;
