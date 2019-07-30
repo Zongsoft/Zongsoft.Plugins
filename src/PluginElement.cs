@@ -76,16 +76,26 @@ namespace Zongsoft.Plugins
 			}
 			private set
 			{
-				if(string.IsNullOrWhiteSpace(value))
+				if(string.IsNullOrEmpty(value))
 					throw new ArgumentNullException();
 
-				if(Zongsoft.Common.StringExtension.ContainsCharacters(value, @"\/.,:;'""`@%^&*?!()[]{}|"))
-					throw new ArgumentException(string.Format("The '{0}' name of plugin-element contains invalid characters in this argument.", value));
+				for(int i = 0; i < value.Length; i++)
+				{
+					var chr = value[i];
 
-				if(string.Equals(_name, value.Trim(), StringComparison.OrdinalIgnoreCase))
+					if((chr == '_' || chr == '-' || chr == '$') ||
+					   (chr >= '0' && chr <= '9') ||
+					   (chr >= 'a' && chr <= 'z') ||
+					   (chr >= 'A' && chr <= 'Z'))
+						continue;
+
+					throw new ArgumentException(string.Format("The plugin element name({0}) contains illegal characters.", value));
+				}
+
+				if(string.Equals(_name, value, StringComparison.Ordinal))
 					return;
 
-				_name = value.Trim();
+				_name = value;
 
 				//激发“PropertyChanged”事件
 				this.OnPropertyChanged("Name");
