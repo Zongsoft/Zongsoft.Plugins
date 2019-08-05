@@ -133,10 +133,10 @@ namespace Zongsoft.Plugins.Builders
 			//第一步(b)：确认容器对象实现的各种泛型集合接口
 			if(containerElementType != null)
 			{
-				if(containerElementType.IsAssignableFrom(child.GetType()))
-					add = GetCollectionAddMethod(container, child.GetType(), out valueType);
-				else if(childElementType != null)
+				if(childElementType != null)
 					add = GetCollectionAddMethod(container, childElementType, out valueType);
+				else
+					add = GetCollectionAddMethod(container, child.GetType(), out valueType);
 			}
 
 			if(add != null)
@@ -198,15 +198,10 @@ namespace Zongsoft.Plugins.Builders
 			}
 
 			//第三步：尝试获取容器对象的默认属性标签
-			var attribute = (System.ComponentModel.DefaultPropertyAttribute)Attribute.GetCustomAttribute(containerType, typeof(System.ComponentModel.DefaultPropertyAttribute), true);
+			var defaultMember = GetDefaultMemberName(containerType);
 
-			if(attribute != null)
-			{
-				var property = containerType.GetProperty(attribute.Name);
-
-				if(property != null && this.Append(property.GetValue(container), child, key))
-					return true;
-			}
+			if(defaultMember != null && defaultMember.Length > 0 && this.Append(Reflection.Reflector.GetValue(container, defaultMember), child, key))
+				return true;
 
 			//第四步：进行特定方法绑定
 			var methods = containerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
@@ -237,6 +232,21 @@ namespace Zongsoft.Plugins.Builders
 
 			//如果上述所有步骤均未完成则返回失败
 			return false;
+		}
+
+		private string GetDefaultMemberName(Type type)
+		{
+			var attribute = Attribute.GetCustomAttribute(type, typeof(DefaultMemberAttribute), true);
+
+			if(attribute != null)
+				return ((DefaultMemberAttribute)attribute).MemberName;
+
+			attribute = Attribute.GetCustomAttribute(type, typeof(System.ComponentModel.DefaultPropertyAttribute), true);
+
+			if(attribute != null)
+				return ((System.ComponentModel.DefaultPropertyAttribute)attribute).Name;
+
+			return null;
 		}
 
 		private Delegate GetDictionaryAddMethod(object container, Type childType, out Type valueType)
