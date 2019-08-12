@@ -117,7 +117,7 @@ namespace Zongsoft.Plugins.Builders
 
 			Type containerType = container.GetType();
 
-			//第一步(a)：确认容器对象实现的各种泛型字典接口
+			//第一步：确认容器对象实现的各种字典接口
 			var add = GetDictionaryAddMethod(container, child.GetType(), out var valueType);
 
 			if(add != null && Common.Convert.TryConvertValue(child, valueType, out var value))
@@ -126,74 +126,34 @@ namespace Zongsoft.Plugins.Builders
 				return true;
 			}
 
-			//获取元素类型（如果元素所有者不是一个可遍历对象，则返回的元素类型为空）
-			var childElementType = Common.TypeExtension.GetElementType(child.GetType());
-			var containerElementType = Common.TypeExtension.GetElementType(containerType);
+			//第二步(a)：确认容器对象实现的各种集合或列表接口
+			add = GetCollectionAddMethod(container, child.GetType(), out valueType);
 
-			//第一步(b)：确认容器对象实现的各种泛型集合接口
-			if(containerElementType != null)
+			if(add != null && Common.Convert.TryConvertValue(child, valueType, out value))
 			{
-				if(childElementType != null)
-					add = GetCollectionAddMethod(container, childElementType, out valueType);
-				else
-					add = GetCollectionAddMethod(container, child.GetType(), out valueType);
+				add.DynamicInvoke(value);
+				return true;
 			}
 
-			if(add != null)
+			//第二步(b)：如果子对象是容器集元素的可遍历集，则遍历该子对象，将其各元素加入到容器集中
+			var elementType = child is string ? null : Common.TypeExtension.GetElementType(child.GetType());
+
+			//如果元素类型不为空，则表示子对象是一个可遍历集
+			if(elementType != null)
 			{
-				if(childElementType != null && valueType.IsAssignableFrom(childElementType))
+				add = GetCollectionAddMethod(container, elementType, out valueType);
+
+				if(add != null)
 				{
 					int count = 0;
 
 					foreach(var entry in (IEnumerable)child)
 					{
-						if(Common.Convert.TryConvertValue(entry, valueType, out var item))
-						{
-							add.DynamicInvoke(item);
-							count++;
-						}
-					}
-
-					if(count > 0)
-						return true;
-					else
-						return false;
-				}
-				else
-				{
-					if(Common.Convert.TryConvertValue(child, valueType, out var item))
-					{
-						add.DynamicInvoke(item);
-						return true;
-					}
-				}
-			}
-
-			//第二步(a)：非泛型字典容器处理
-			if(typeof(IDictionary).IsAssignableFrom(containerType))
-			{
-				((IDictionary)container).Add(key, child);
-				return true;
-			}//第二步(b)：非泛型集合容器处理
-			else if(typeof(IList).IsAssignableFrom(containerType))
-			{
-				var list = (IList)container;
-
-				if(child.GetType() != typeof(string) && child is IEnumerable)
-				{
-					var count = 0;
-
-					foreach(var entry in (IEnumerable)child)
-					{
-						if(list.Add(entry) >= 0)
-							count++;
+						add.DynamicInvoke(entry);
+						count++;
 					}
 
 					return count > 0;
-				}
-				else
-				{
-					return list.Add(child) >= 0;
 				}
 			}
 
