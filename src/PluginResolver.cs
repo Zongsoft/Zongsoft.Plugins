@@ -421,7 +421,7 @@ namespace Zongsoft.Plugins
 					case XmlNodeType.Text:
 						return reader.Value;
 					case XmlNodeType.Element:
-						string tempPath = PluginPath.Combine("Temporary", plugin.Name.Replace(".", ""), path.Trim('/').Replace('/', '-'), Zongsoft.Common.RandomGenerator.GenerateString());
+						string tempPath = PluginPath.Combine("Temporary", plugin.Name.Replace(".", ""), path.Trim('/').Replace('/', '-'), Zongsoft.Common.Randomizer.GenerateString());
 						var tempBuiltin = this.ResolveBuiltin(reader, plugin, tempPath);
 						return tempBuiltin;
 				}
