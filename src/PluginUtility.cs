@@ -737,6 +737,9 @@ namespace Zongsoft.Plugins
 						else
 							memberValue = serviceProvider.Resolve(attribute.Contract ?? ((FieldInfo)member).FieldType);
 
+						if(memberValue == null && attribute != null && attribute.IsRequired)
+							throw new InvalidOperationException($"The injected {((PropertyInfo)member).Name} field value is null when building the '{builtin}' plugin builtin.");
+
 						((FieldInfo)member).SetValue(target, memberValue);
 						break;
 					case MemberTypes.Property:
@@ -746,6 +749,9 @@ namespace Zongsoft.Plugins
 								memberValue = serviceProvider.Resolve(attribute.Name);
 							else
 								memberValue = serviceProvider.Resolve(attribute.Contract ?? ((PropertyInfo)member).PropertyType);
+
+							if(memberValue == null && attribute != null && attribute.IsRequired)
+								throw new InvalidOperationException($"The injected {((PropertyInfo)member).Name} property value is null when building the '{builtin}' plugin builtin.");
 
 							((PropertyInfo)member).SetValue(target, memberValue);
 						}
