@@ -52,6 +52,7 @@
 			<queue.maximumLimit>1024</queue.maximumLimit>
 		</object>
 
+		<object name="Secretor" type="Zongsoft.Security.SecretProvider, Zongsoft.CoreLibrary" />
 		<object name="HasCollection" type="Zongsoft.Collections.Plugins.HasCollectionPredication, Zongsoft.Plugins" />
 	</extension>
 
