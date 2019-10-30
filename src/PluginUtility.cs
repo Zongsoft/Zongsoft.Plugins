@@ -26,6 +26,7 @@
 
 using System;
 using System.Reflection;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -269,13 +270,13 @@ namespace Zongsoft.Plugins
 
 		internal static void UpdateProperties(object target, Builtin builtin, IEnumerable<string> ignoredProperties)
 		{
-			if(target == null || builtin == null)
+			if(target == null || builtin == null || !builtin.HasProperties)
 				return;
 
-			foreach(string propertyName in builtin.Properties.Keys)
+			foreach(var property in builtin.Properties)
 			{
 				//如果当前属性名为忽略属性则忽略设置
-				if(ignoredProperties != null && ignoredProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
+				if(ignoredProperties != null && ignoredProperties.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
 					continue;
 
 				try
@@ -284,14 +285,21 @@ namespace Zongsoft.Plugins
 
 					//如果构件中当前属性名在目标对象中不存在则记录告警日志
 					//注意：对于不存在的集合成员的获取类型可能会失败，但是下面的设置操作可能会成功，因此这里不能直接返回。
-					if(!Reflection.MemberAccess.TryGetMemberType(target, propertyName, out propertyType))
-						Zongsoft.Diagnostics.Logger.Warn($"The '{propertyName}' property of '{builtin}' builtin is not existed on '{target.GetType().FullName}' target.");
+					if(!Reflection.MemberAccess.TryGetMemberType(target, property.Name, out propertyType, out var converterTypeName))
+						Zongsoft.Diagnostics.Logger.Warn($"The '{property.Name}' property of '{builtin}' builtin is not existed on '{target.GetType().FullName}' target.");
 
-					//获取构件中当前属性的值
-					var propertyValue = builtin.Properties.GetValue(propertyName, propertyType, null);
+					//更新属性类型
+					property.Type = propertyType;
+
+					//更新属性的类型转换器
+					if(converterTypeName != null && converterTypeName.Length > 0)
+					{
+						property.Converter = Activator.CreateInstance(GetType(converterTypeName)) as TypeConverter ??
+						                     throw new InvalidOperationException($"The '{converterTypeName}' type declared by the '{property.Name}' member of type '{target.GetType().FullName}' is not a type converter.");
+					}
 
 					//将构件中当前属性值更新目标对象的对应属性中
-					Reflection.MemberAccess.TrySetMemberValue(target, propertyName, propertyValue);
+					Reflection.MemberAccess.TrySetMemberValue(target, property.Name, property.Value);
 				}
 				catch(Exception ex)
 				{
@@ -308,8 +316,8 @@ namespace Zongsoft.Plugins
 
 					message.AppendFormat("\tOccurred an error on set '{1}' property of '{0}' builtin, it's raw value is \"{2}\", The target type of builtin is '{3}'.",
 											builtin.ToString(),
-											propertyName,
-											builtin.Properties.GetRawValue(propertyName),
+											property.Name,
+											builtin.Properties.GetRawValue(property.Name),
 											target.GetType().AssemblyQualifiedName);
 
 					throw new PluginException(message.ToString(), ex);
@@ -573,13 +581,13 @@ namespace Zongsoft.Plugins
 			return System.Threading.Interlocked.Increment(ref _anonymousId);
 		}
 
-		internal static object ResolveValue(PluginElement element, string text, string memberName, Type memberType, object defaultValue)
+		internal static object ResolveValue(PluginElement element, string text, string memberName, Type memberType, TypeConverter converter, object defaultValue)
 		{
 			if(element == null)
 				throw new ArgumentNullException(nameof(element));
 
 			if(string.IsNullOrWhiteSpace(text))
-				return Zongsoft.Common.Convert.ConvertValue(text, memberType, defaultValue);
+				return Zongsoft.Common.Convert.ConvertValue(text, memberType, () => converter, defaultValue);
 
 			object result = text;
 
@@ -598,7 +606,7 @@ namespace Zongsoft.Plugins
 			if(memberType == null)
 				return result;
 			else
-				return Zongsoft.Common.Convert.ConvertValue(result, memberType, defaultValue);
+				return Zongsoft.Common.Convert.ConvertValue(result, memberType, () => converter, defaultValue);
 		}
 
 		internal static Assembly LoadAssembly(AssemblyName assemblyName)

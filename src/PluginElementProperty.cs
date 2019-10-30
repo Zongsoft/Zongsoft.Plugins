@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
- * Copyright (C) 2010-2017 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2010-2019 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Plugins.
  *
@@ -26,6 +26,7 @@
 
 using System;
 using System.Threading;
+using System.ComponentModel;
 
 namespace Zongsoft.Plugins
 {
@@ -131,29 +132,47 @@ namespace Zongsoft.Plugins
 				var valueEvaluated = Interlocked.CompareExchange(ref _valueEvaluated, 1, 0);
 
 				if(valueEvaluated == 0)
-					_value = this.GetValue(null, null);
+					_value = this.GetValue(this.Type, null);
 
 				return _value;
 			}
+		}
+
+		/// <summary>
+		/// 获取或设置属性类型。
+		/// </summary>
+		public Type Type
+		{
+			get; set;
+		}
+
+		/// <summary>
+		/// 获取或设置类型转换器。
+		/// </summary>
+		public TypeConverter Converter
+		{
+			get; set;
 		}
 		#endregion
 
 		#region 公共方法
 		public object GetValue(Type valueType)
 		{
-			object defaultValue = valueType == null ? null : Zongsoft.Common.TypeExtension.GetDefaultValue(valueType);
-			return this.GetValue(valueType, defaultValue);
+			return this.GetValue(
+				valueType ?? this.Type,
+				valueType == null ? null : Zongsoft.Common.TypeExtension.GetDefaultValue(valueType)
+			);
 		}
 
 		public object GetValue(Type valueType, object defaultValue)
 		{
 			if(_valueNode == null)
-				return PluginUtility.ResolveValue(_owner, _rawValue, _name, valueType, defaultValue);
+				return PluginUtility.ResolveValue(_owner, _rawValue, _name, valueType, this.Converter, defaultValue);
 
 			var result = _valueNode.UnwrapValue(ObtainMode.Auto, new Builders.BuilderSettings(valueType));
 
 			if(valueType != null)
-				result = Zongsoft.Common.Convert.ConvertValue(result, valueType, defaultValue);
+				result = Zongsoft.Common.Convert.ConvertValue(result, valueType, () => this.Converter, defaultValue);
 
 			return result;
 		}
