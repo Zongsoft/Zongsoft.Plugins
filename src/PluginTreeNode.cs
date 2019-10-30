@@ -363,7 +363,7 @@ namespace Zongsoft.Plugins
 					foreach(PluginExtendedProperty property in properties)
 					{
 						Type propertyType;
-						Reflection.MemberAccess.TryGetMemberType(_value, property.Name, out propertyType);
+						Reflection.MemberAccess.TryGetMemberType(_value, property.Name, out propertyType, out _);
 						Reflection.MemberAccess.TrySetMemberValue(_value, property.Name, property.GetValue(propertyType));
 					}
 				}

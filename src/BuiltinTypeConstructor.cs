@@ -33,10 +33,6 @@ namespace Zongsoft.Plugins
 {
 	public class BuiltinTypeConstructor : IEnumerable<BuiltinTypeConstructor.Parameter>
 	{
-		#region 静态变量
-		private static Parameter[] EmptyParameters = new Parameter[0];
-		#endregion
-
 		#region 成员变量
 		private BuiltinType _builtinType;
 		private IList<Parameter> _parameters;
@@ -87,7 +83,7 @@ namespace Zongsoft.Plugins
 					return _parameterArray;
 
 				if(_parameters.Count == 0)
-					return EmptyParameters;
+					return Array.Empty<Parameter>();
 				else
 					return _parameters.ToArray();
 			}
@@ -125,7 +121,7 @@ namespace Zongsoft.Plugins
 		#endregion
 
 		[Serializable]
-		public class Parameter : MarshalByRefObject
+		public class Parameter
 		{
 			#region 成员变量
 			private BuiltinTypeConstructor _constructor;
@@ -173,7 +169,7 @@ namespace Zongsoft.Plugins
 			{
 				get
 				{
-					if(_parameterType == null && (!string.IsNullOrWhiteSpace(_parameterTypeName)))
+					if(_parameterType == null && (!string.IsNullOrEmpty(_parameterTypeName)))
 						_parameterType = PluginUtility.GetType(_parameterTypeName);
 
 					return _parameterType;
@@ -218,7 +214,7 @@ namespace Zongsoft.Plugins
 			{
 				get
 				{
-					return this.GetValue(null);
+					return this.GetValue(this.ParameterType);
 				}
 			}
 			#endregion
@@ -229,12 +225,7 @@ namespace Zongsoft.Plugins
 				var original = System.Threading.Interlocked.CompareExchange(ref _evaluateValueRequired, 1, 0);
 
 				if(original == 0)
-				{
-					if(valueType != null && string.IsNullOrEmpty(_parameterTypeName))
-						_value = PluginUtility.ResolveValue(_constructor.Builtin, _rawValue, null, valueType, null);
-					else
-						_value = PluginUtility.ResolveValue(_constructor.Builtin, _rawValue, null, this.ParameterType, null);
-				}
+					_value = PluginUtility.ResolveValue(_constructor.Builtin, _rawValue, null, valueType ?? this.ParameterType, null, null);
 
 				return _value;
 			}
