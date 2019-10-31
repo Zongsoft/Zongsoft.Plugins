@@ -58,6 +58,9 @@
 
 	<!-- 挂载工作台下的必须的组件 -->
 	<extension path="/Workbench">
+		<!-- 挂载当前应用的模块集 -->
+		<object name="Modules" value="{path:/Workspace/Environment/ApplicationContext.Modules}" />
+
 		<!-- 驱动构建服务容器集 -->
 		<object value="{path:/Workspace/Services/Providers}" />
 
