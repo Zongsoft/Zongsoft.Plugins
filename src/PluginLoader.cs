@@ -548,7 +548,12 @@ namespace Zongsoft.Plugins
 				foreach(var dependency in plugin.Manifest.Dependencies)
 				{
 					if(dependency.Plugin == null)
-						dependency.Plugin = dependencyThunk(dependency.Name);
+					{
+						if(plugin.Parent != null && string.Equals(dependency.Name, plugin.Parent.Name, StringComparison.OrdinalIgnoreCase))
+							dependency.Plugin = plugin.Parent;
+						else
+							dependency.Plugin = dependencyThunk(dependency.Name);
+					}
 
 					if(dependency.Plugin == null)
 					{
