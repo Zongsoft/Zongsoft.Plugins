@@ -61,6 +61,9 @@
 		<!-- 挂载当前应用的模块集 -->
 		<object name="Modules" value="{path:/Workspace/Environment/ApplicationContext.Modules}" />
 
+		<!-- 挂载当前应用的模式集 -->
+		<object name="Schemas" value="{path:/Workspace/Environment/ApplicationContext.Schemas}" />
+
 		<!-- 驱动构建服务容器集 -->
 		<object value="{path:/Workspace/Services/Providers}" />
 
