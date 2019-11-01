@@ -331,7 +331,7 @@ namespace Zongsoft.Plugins
 					//以避免将重复新建的实例追加到所有者集合中可能导致的集合项键冲突的错误。
 
 					if(settings == null)
-						settings = Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreAppending);
+						settings = Builders.BuilderSettings.Create(Builders.BuilderSettingsFlags.IgnoreAppending);
 					else
 						settings.SetFlags(Builders.BuilderSettingsFlags.IgnoreAppending);
 

@@ -85,7 +85,7 @@ namespace Zongsoft.Plugins.Builders
 		#endregion
 
 		#region 静态方法
-		public static BuilderSettings Ignores(BuilderSettingsFlags flags)
+		public static BuilderSettings Create(BuilderSettingsFlags flags)
 		{
 			return new BuilderSettings(null) { Flags = flags };
 		}
