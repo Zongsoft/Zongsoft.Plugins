@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 
 using Zongsoft.Plugins;
+using Zongsoft.Plugins.Builders;
 
 namespace Zongsoft.Services
 {
@@ -221,7 +222,11 @@ namespace Zongsoft.Services
 
 			protected override object CreateService()
 			{
-				return _node.UnwrapValue(ObtainMode.Auto);
+				var serviceType = this.ServiceType;
+				var settings = serviceType != null && typeof(ServiceProviderBase).IsAssignableFrom(serviceType) ?
+					BuilderSettings.Create(BuilderSettingsFlags.IgnoreChildren) : null;
+
+				return _node.UnwrapValue(ObtainMode.Auto, settings);
 			}
 			#endregion
 		}
