@@ -355,7 +355,7 @@ namespace Zongsoft.Plugins
 				var plugin = this.LoadPluginManifest(filePath, parent, settings);
 
 				//如果预加载失败，则跳过以进行下一个插件文件的处理
-				if(plugin == null || plugin.Status == PluginStatus.Failed)
+				if(plugin == null)
 					continue;
 
 				//判断当前预加载的插件是否为主插件
@@ -406,13 +406,7 @@ namespace Zongsoft.Plugins
 			if(parent == null)
 			{
 				if(_plugins.Any(p => string.Equals(p.Name, plugin.Name, StringComparison.OrdinalIgnoreCase)))
-				{
-					plugin.Status = PluginStatus.Failed;
-					plugin.StatusDescription = string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath);
-
-					//抛出插件文件异常(原因为插件名称重复)
 					throw new PluginFileException(plugin.FilePath, $"The name is '{plugin.Name}' of plugin was exists. it's path is: '{plugin.FilePath}'");
-				}
 
 				//将预加载的插件对象加入到根插件的集合中
 				_plugins.Add(plugin);
@@ -421,13 +415,7 @@ namespace Zongsoft.Plugins
 			{
 				//将预加载的插件对象加入到父插件的子集中，如果返回假则表示加载失败
 				if(!parent.Children.Add(plugin, false))
-				{
-					plugin.Status = PluginStatus.Failed;
-					plugin.StatusDescription = string.Format("The name is '{0}' of plugin was exists. it's path is: '{1}'", plugin.Name, plugin.FilePath);
-
-					//抛出插件文件异常(原因为插件名称重复)
 					throw new PluginFileException(plugin.FilePath, $"The name is '{plugin.Name}' of plugin was exists. it's path is: '{plugin.FilePath}'");
-				}
 			}
 
 			return plugin;
@@ -457,9 +445,6 @@ namespace Zongsoft.Plugins
 			}
 			catch(Exception ex)
 			{
-				plugin.Status = PluginStatus.Failed;
-				plugin.StatusDescription = ex.Message;
-
 				if(plugin.Parent == null)
 					_plugins.Remove(plugin.Name);
 				else
@@ -556,12 +541,7 @@ namespace Zongsoft.Plugins
 					}
 
 					if(dependency.Plugin == null)
-					{
-						plugin.Status = PluginStatus.Failed;
-						plugin.StatusDescription = string.Format("The '{0}' plugin load failed. it's '{1}' dependent plugin is not exists.", plugin.Name, dependency.Name);
-
-						throw new PluginException(plugin.StatusDescription);
-					}
+						throw new PluginException($"The '{plugin.Name}' plugin load failed. it's '{dependency.Name}' dependent plugin is not exists.");
 
 					//只要有一个依赖插件未加载完成则表示该插件不能立即加载(即返回假)
 					if(dependency.Plugin.Status != PluginStatus.Loaded)

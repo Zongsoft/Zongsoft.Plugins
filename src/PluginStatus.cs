@@ -47,8 +47,5 @@ namespace Zongsoft.Plugins
 
 		/// <summary>表示插件已经被卸载。</summary>
 		Unloaded,
-
-		/// <summary>表示插件在解析或加过程载中出现错误，该状态的插件的构件不会被挂载到系统中。</summary>
-		Failed = 0x80,
 	}
 }

@@ -45,7 +45,6 @@ namespace Zongsoft.Plugins
 		private string _filePath;
 		private bool _isHidden;
 		private PluginStatus _status;
-		private string _statusDescription;
 		private PluginManifest _manifest;
 		private Plugin _parent;
 		private PluginCollection _children;
@@ -175,10 +174,6 @@ namespace Zongsoft.Plugins
 		/// <summary>
 		/// 获取当前插件的状态。
 		/// </summary>
-		/// <remarks>
-		///		<para>该属性值为<see cref="Zongsoft.Plugins.PluginStatus.Failed"/>时，表示插件在插件的解析或加载过程发生了错误，该状态的插件不会出现在根插件集或对应父插件的子集中。</para>
-		///		<para>如果要处理插件在解析或加载过程中发生的异常情况，请使用<seealso cref="Zongsoft.Plugins.PluginLoader.Failure"/>事件。</para>
-		/// </remarks>
 		public PluginStatus Status
 		{
 			get
@@ -187,25 +182,7 @@ namespace Zongsoft.Plugins
 			}
 			internal set
 			{
-				if(_status == value)
-					return;
-
 				_status = value;
-			}
-		}
-
-		/// <summary>
-		/// 获取当前插件状态的描述文本。
-		/// </summary>
-		public string StatusDescription
-		{
-			get
-			{
-				return _statusDescription;
-			}
-			internal set
-			{
-				_statusDescription = value;
 			}
 		}
 
