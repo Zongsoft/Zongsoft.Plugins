@@ -793,14 +793,27 @@ namespace Zongsoft.Plugins
 			if(elementType != null)
 				return elementType;
 
-			var attribute = ownerType.GetCustomAttribute<System.ComponentModel.DefaultPropertyAttribute>(true);
+			MemberInfo[] members = null;
+			var memberAttribute = ownerType.GetCustomAttribute<DefaultMemberAttribute>(true);
 
-			if(attribute != null)
+			if(memberAttribute != null)
+				members = ownerType.GetMember(memberAttribute.MemberName, BindingFlags.Public | BindingFlags.Instance);
+			else
 			{
-				var property = ownerType.GetProperty(attribute.Name, BindingFlags.Public | BindingFlags.Instance);
+				var propertyAttribute = ownerType.GetCustomAttribute<DefaultPropertyAttribute>(true);
+				if(propertyAttribute != null)
+					members = ownerType.GetMember(propertyAttribute.Name, BindingFlags.Public | BindingFlags.Instance);
+			}
 
-				if(property != null)
-					return GetImplementedCollectionElementType(property.PropertyType);
+			if(members != null && members.Length == 1)
+			{
+				switch(members[0].MemberType)
+				{
+					case MemberTypes.Field:
+						return GetImplementedCollectionElementType(((FieldInfo)members[0]).FieldType);
+					case MemberTypes.Property:
+						return GetImplementedCollectionElementType(((PropertyInfo)members[0]).PropertyType);
+				}
 			}
 
 			return null;
