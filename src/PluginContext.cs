@@ -157,25 +157,13 @@ namespace Zongsoft.Plugins
 			if(node == null)
 				throw new PluginException($"Not found the PluginTreeNode with '{expression.Path}' path.");
 
-			try
-			{
-				//获取指定路径的目标对象
-				object target = node.UnwrapValue(obtainMode, targetType == null ? null : new Builders.BuilderSettings(targetType));
+			//获取指定路径的目标对象
+			object target = node.UnwrapValue(obtainMode, targetType == null ? null : new Builders.BuilderSettings(targetType));
 
-				if(target != null && expression.Members.Length > 0)
-					return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);
+			if(target != null && expression.Members.Length > 0)
+				return Reflection.MemberAccess.GetMemberValue<object>(target, expression.Members);
 
-				return target;
-			}
-			catch(Exception ex)
-			{
-				var fileName = string.Empty;
-
-				if(origin != null && origin.Plugin != null)
-					fileName = System.IO.Path.GetFileName(origin.Plugin.FilePath);
-
-				throw new PluginException(string.Format("Resolve target error from '{0}' path in '{1}' plugin file.", pathText, fileName), ex);
-			}
+			return target;
 		}
 		#endregion
 	}

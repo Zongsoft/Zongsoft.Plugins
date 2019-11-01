@@ -303,6 +303,9 @@ namespace Zongsoft.Plugins
 				}
 				catch(Exception ex)
 				{
+					if(System.Diagnostics.Debugger.IsAttached)
+						throw;
+
 					var message = new StringBuilder();
 
 					message.AppendFormat("{0}[{1}]", ex.Message, ex.Source);
@@ -330,7 +333,7 @@ namespace Zongsoft.Plugins
 			if(builtinType == null)
 				throw new ArgumentNullException(nameof(builtinType));
 
-			object target = null;
+			object target;
 
 			if(builtinType.Constructor == null || builtinType.Constructor.Count < 1)
 			{
@@ -348,14 +351,17 @@ namespace Zongsoft.Plugins
 				try
 				{
 					target = Activator.CreateInstance(builtinType.Type, values);
-
-					//注入依赖属性
-					InjectProperties(target, builtinType.Builtin);
 				}
 				catch(Exception ex)
 				{
+					if(System.Diagnostics.Debugger.IsAttached)
+						throw;
+
 					throw new PluginException(string.Format("Create object of '{0}' type faild, The parameters count of constructor is {1}.", builtinType.TypeName, values.Length), ex);
 				}
+
+				//注入依赖属性
+				InjectProperties(target, builtinType.Builtin);
 			}
 
 			return target;
@@ -373,9 +379,11 @@ namespace Zongsoft.Plugins
 
 		internal static object BuildType(Type type, Builtin builtin)
 		{
+			object target;
+
 			try
 			{
-				object result = BuildType(type, (Type parameterType, string parameterName, out object parameterValue) =>
+				target = BuildType(type, (Type parameterType, string parameterName, out object parameterValue) =>
 				{
 					if(parameterType == typeof(Builtin))
 					{
@@ -416,18 +424,21 @@ namespace Zongsoft.Plugins
 					return ObtainParameter(builtin.Plugin, parameterType, parameterName, out parameterValue);
 				});
 
-				if(result == null)
+				if(target == null)
 					throw new PluginException(string.Format("Can not build instance of '{0}' type, Maybe that's cause type-generator not found matched constructor with parameters. in '{1}' builtin.", type.FullName, builtin));
-
-				//注入依赖属性
-				InjectProperties(result, builtin);
-
-				return result;
 			}
 			catch(Exception ex)
 			{
+				if(System.Diagnostics.Debugger.IsAttached)
+					throw;
+
 				throw new PluginException(string.Format("Occurred an exception on create a builtin instance of '{0}' type, at '{1}' builtin.", type.FullName, builtin), ex);
 			}
+
+			//注入依赖属性
+			InjectProperties(target, builtin);
+
+			return target;
 		}
 
 		internal static object BuildType(Type type, ObtainParameterCallback obtainParameter)
@@ -548,7 +559,7 @@ namespace Zongsoft.Plugins
 
 				if(valueType == null || typeof(Services.IApplicationModule).IsAssignableFrom(valueType))
 				{
-					var value = node.UnwrapValue(ObtainMode.Auto, Builders.BuilderSettings.Ignores(Builders.BuilderSettingsFlags.IgnoreChildren));
+					var value = node.UnwrapValue(ObtainMode.Auto, Builders.BuilderSettings.Create(Builders.BuilderSettingsFlags.IgnoreChildren));
 
 					if(value != null && value is Zongsoft.Services.IApplicationModule module)
 						return module;
