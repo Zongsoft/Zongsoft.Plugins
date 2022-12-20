@@ -5,6 +5,8 @@
 README: [English](https://github.com/Zongsoft/Zongsoft.Plugins/blob/master/README.md) | [简体中文](https://github.com/Zongsoft/Zongsoft.Plugins/blob/master/README-zh_CN.md)
 
 -----
+注：该项目已归档，对应的替代版本请参考：https://github.com/Zongsoft/Framework/blob/master/Zongsoft.Plugins
+-----
 
 [Zongsoft.Plugins](https://github.com/Zongsoft/Zongsoft.Plugins) 是一个无侵入的插件化开发框架库，无论终端程序、富客户端、后台服务程序还是 **W**eb 应用程序，都不需要引用 **Zongsoft.Plugins** 即可被改造成一个插件化的应用。
 
